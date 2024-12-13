@@ -1,137 +1,238 @@
 <script>
-    import { onMount } from 'svelte';
-    import { db } from './lib/firebase.config';
-    import {set, get, ref, remove} from 'firebase/database'
+  import { onMount } from 'svelte';
+  import { writable } from 'svelte/store';
 
-    let books = [];
-    let newBook = { author: '', title: '', edition: '', comments: '', read: false, loaned: false };
+  // Firebase imports (make sure to install firebase with npm)
+  import { initializeApp } from 'firebase/app';
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    signOut, 
+    onAuthStateChanged 
+  } from 'firebase/auth';
 
-    onMount (
-      getDb()
-     )
+  // Initialize Firebase
+  let app;
+  let auth;
+  let googleProvider;
 
-    async function getDb() {
-        const dbRef = ref(db, 'books/')
+  // User store
+  const user = writable(null);
 
-        try {
-          const snapshot = await get(dbRef);
+  // Form states
+  let email = '';
+  let password = '';
+  let error = '';
+  let isLoading = false;
 
-          if(snapshot.exists())
-            books = Object.values(snapshot.val());
-          else
-            books = [];
-        }
-        catch (e) {
-          console.error('Errore nel caricamento del database:', e);
-        }
-      }
+  onMount(() => {
+    // Initialize Firebase when component mounts
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
 
-    async function addToDb(book) {
-        console.log(book)
-        const booksRef = ref(db, 'books/');
-        try {
-            const snapshot = await get(booksRef);
-            const books = snapshot.exists ? snapshot.val() : {};
-            const newId = Object.keys(books).length + 1;
-            
-            await set(ref(db, `books/book${newId}`), {
-            id: newId,
-            author: book.author,
-            title: book.title,
-            edition: book.edition,
-            read: book.read,
-            loaned: book.loaned
-            }
-        )
-        console.log('Libro salvato con successo!');
-        }
-        catch (e) {
-            console.error('Errore nel salvataggio del libro:', e);
-        }
-    }   
+    // Listen for authentication state changes
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      user.set(currentUser);
+    });
 
-    const addNewBook = () => {
-      books = [...books, { ...newBook, id: Date.now() }];
-      addToDb(newBook)
-      newBook = { author: '', title: '', edition: '', comments: '', read: false, loaned: false };
-    };
-  
-    async function removeBook(id) {
-    const bookRef = ref(db, `books/book${id}`); // Percorso esatto del libro
+    // Cleanup subscription on component destroy
+    return () => unsubscribe();
+  });
+
+  // Email/Password Sign Up
+  async function handleSignUp() {
+    error = '';
+    isLoading = true;
     try {
-        await remove(bookRef);
-        books = books.filter(book => book.id !== id); // Aggiorna la lista locale
-        console.log('Libro rimosso con successo!');
-    } catch (e) {
-        console.error('Errore nella rimozione del libro:', e);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      user.set(userCredential.user);
+    } catch (err) {
+      error = err.message;
     }
-}
+    isLoading = false;
+  }
 
-  </script>
-  
-  <h1>Gestione Biblioteca</h1>
-  
-  <section>
-    <h2>Aggiungi un nuovo libro</h2>
-    <form on:submit|preventDefault={addNewBook}>
-      <input type="text" bind:value={newBook.author} placeholder="Autore" required />
-      <input type="text" bind:value={newBook.title} placeholder="Titolo" required />
-      <input type="text" bind:value={newBook.edition} placeholder="Edizione" />
-      <textarea bind:value={newBook.comments} placeholder="Commenti"></textarea>
-      <label>
-        Letto: <input type="checkbox" bind:checked={newBook.read} />
-      </label>
-      <label>
-        Prestato: <input type="checkbox" bind:checked={newBook.loaned} />
-      </label>
-      <button type="submit">Aggiungi</button>
-    </form>
-  </section>
-  
-  <section>
-    <h2>Lista Libri</h2>
-    {#if books.length === 0}
-      <p>Non ci sono libri nella tua biblioteca.</p>
-    {/if}
-    <ul>
-      {#each books as book (book.id)}
-        <li>
-          <strong>{book.title}</strong> di {book.author} 
-          <button on:click={() => removeBook(book.id)}>Rimuovi</button>
-        </li>
-      {/each}
-    </ul>
-  </section>
-  
-  <style>
-    h1 {
-      font-family: Arial, sans-serif;
-      margin-bottom: 20px;
+  // Email/Password Sign In
+  async function handleSignIn() {
+    error = '';
+    isLoading = true;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      user.set(userCredential.user);
+    } catch (err) {
+      error = err.message;
     }
-    form {
-      margin-bottom: 30px;
+    isLoading = false;
+  }
+
+  // Google Sign In
+  async function handleGoogleSignIn() {
+    error = '';
+    isLoading = true;
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      user.set(result.user);
+    } catch (err) {
+      error = err.message;
     }
-    input, textarea, button {
-      margin: 5px 0;
-      display: block;
+    isLoading = false;
+  }
+
+  // Sign Out
+  async function handleSignOut() {
+    try {
+      await signOut(auth);
+      user.set(null);
+    } catch (err) {
+      error = err.message;
     }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      margin: 10px 0;
-    }
-    button {
-      background: #007BFF;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
-  
+  }
+</script>
+
+<div class="auth-container">
+  {#if $user}
+    <div class="user-profile">
+      <h2>Benvenuto, {$user.displayName || $user.email}!</h2>
+      
+      {#if $user.photoURL}
+        <img 
+          src={$user.photoURL} 
+          alt="Profilo utente" 
+          class="user-avatar"
+        />
+      {/if}
+      
+      <div class="user-details">
+        <p>Email: {$user.email}</p>
+        <p>ID Utente: {$user.uid}</p>
+      </div>
+      
+      <button on:click={handleSignOut} class="sign-out-btn">
+        Esci
+      </button>
+    </div>
+  {:else}
+    <div class="auth-form">
+      <h2>Accedi o Registrati</h2>
+      
+      {#if error}
+        <p class="error-message">{error}</p>
+      {/if}
+      
+      <input 
+        type="email" 
+        placeholder="Email" 
+        bind:value={email}
+        disabled={isLoading}
+      />
+      
+      <input 
+        type="password" 
+        placeholder="Password" 
+        bind:value={password}
+        disabled={isLoading}
+      />
+      
+      <div class="button-group">
+        <button 
+          on:click={handleSignIn}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Accesso in corso...' : 'Accedi'}
+        </button>
+        
+        <button 
+          on:click={handleSignUp}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Registrazione...' : 'Registrati'}
+        </button>
+      </div>
+      
+      <div class="social-login">
+        <button 
+          on:click={handleGoogleSignIn}
+          disabled={isLoading}
+          class="google-btn"
+        >
+          Accedi con Google
+        </button>
+      </div>
+    </div>
+  {/if}
+</div>
+
+<style>
+  .auth-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .auth-form input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .button-group button,
+  .social-login button {
+    flex: 1;
+    padding: 0.75rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .button-group button:nth-child(2) {
+    background-color: #2196F3;
+  }
+
+  .google-btn {
+    background-color: #DB4437;
+    margin-top: 1rem;
+  }
+
+  .user-profile {
+    text-align: center;
+  }
+
+  .user-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 1rem 0;
+  }
+
+  .sign-out-btn {
+    background-color: #f44336;
+  }
+
+  .error-message {
+    color: red;
+    margin-bottom: 1rem;
+  }
+
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+</style>
