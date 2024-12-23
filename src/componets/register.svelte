@@ -2,15 +2,40 @@
   import { auth } from "../lib/firebase.config";
   import { createUserWithEmailAndPassword } from "firebase/auth";
   import { sign_up } from "../stores/authStore";
+  import { assignRole } from "../lib/db_scripts/assign_role";
+  import { goto } from "$app/navigation";
 
   let email = "";
   let password = "";
+  let confirmPassword = "";
   let error = "";
+  let passwordVisible = false;
 
-  const register = async () => {
+  const register = async (event) => {
+    event.preventDefault();
+    if (password !== confirmPassword) {
+      error = "Le password non corrispondono.";
+      return;
+    }
+    if (!email.includes("@")) {
+      error = "Inserisci un'email valida.";
+      return;
+    }
+    if (password.length < 6) {
+      error = "La password deve contenere almeno 6 caratteri.";
+      return;
+    }
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      let userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      const newUser = userCredential.user;
+      assignRole(newUser.uid, "VIEWER", newUser.email);
       $sign_up = false;
+      goto("./biblioteca");
     } catch (e) {
       error = e.message;
     }
@@ -19,6 +44,10 @@
   function toggleSignUp() {
     $sign_up = false;
   }
+
+  const togglePasswordVisibility = () => {
+    passwordVisible = !passwordVisible;
+  };
 </script>
 
 <div>
@@ -40,21 +69,50 @@
     </div>
     <div class="inputForm">
       <input
+        class="input password-hidden"
         type="password"
-        class="input"
         placeholder="Enter your Password"
         bind:value={password}
+        style="display: {passwordVisible ? 'none' : 'block'}"
+      />
+      <input
+        class="input password-visible"
+        type="text"
+        placeholder="Enter your Password"
+        bind:value={password}
+        style="display: {passwordVisible ? 'block' : 'none'}"
+      />
+      <button
+        type="button"
+        class="toggle-password"
+        on:click={togglePasswordVisibility}
+        tabindex="-1"
+        aria-label="Toggle password visibility"
+      >
+        {passwordVisible ? "🔓" : "🔒"}
+      </button>
+    </div>
+
+    <div class="flex-column">
+      <label for="confirmPassword">Conferma Password</label>
+    </div>
+    <div class="inputForm">
+      <input
+        class="input password-hidden"
+        type="password"
+        placeholder="Re-enter your Password"
+        bind:value={confirmPassword}
+        style="display: {passwordVisible ? 'none' : 'block'}"
+      />
+      <input
+        class="input password-visible"
+        type="text"
+        placeholder="Re-enter your Password"
+        bind:value={confirmPassword}
+        style="display: {passwordVisible ? 'block' : 'none'}"
       />
     </div>
-    <!-- 
-        <div class="flex-row">
-          <div>
-            <input type="checkbox" />
-            <label for="checkbox">Remember me</label>
-          </div>
-          <span class="span">Forgot password?</span>
-        </div>
-     -->
+
     <button type="submit" class="button-submit">Sign Up</button>
     <p class="p">
       Do you have an account?
@@ -93,6 +151,22 @@
     font-weight: 600;
   }
 
+  .toggle-password {
+    background: none;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 10px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    z-index: 99;
+  }
+
   .inputForm {
     border: 1.5px solid #ecedec;
     border-radius: 10px;
@@ -101,6 +175,7 @@
     align-items: center;
     padding-left: 10px;
     transition: 0.2s ease-in-out;
+    position: relative;
   }
 
   .input {
@@ -117,6 +192,22 @@
 
   .inputForm:focus-within {
     border: 1.5px solid #2d79f3;
+  }
+
+  .password-hidden {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .password-visible {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   .flex-row {

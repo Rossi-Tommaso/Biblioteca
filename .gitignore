@@ -1,10 +1,26 @@
+# Sistema operativo
 .DS_Store
-node_modules
-/build
-/.svelte-kit
+
+# Node.js
+node_modules/
+
+# Svelte e Vite
+/build/
+/.svelte-kit/
 /package
+
+# File di configurazione e ambienti
 .env
 .env.*
 !.env.example
+
+# File temporanei generati da Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Chiavi di servizio Firebase (NON deve mai essere tracciata!)
+biblioteca-6a8e6-firebase-adminsdk-yo9ps-50dbfb2235.json
+
+# Script locali
+/src/lib/db_scripts/create_routes.js
+/src/lib/db_scripts/set_admin_role.js

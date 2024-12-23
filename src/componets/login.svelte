@@ -16,7 +16,7 @@
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      goto('./main')
+      goto('./biblioteca')
     } catch (err) {
       error = err.message;
     }
@@ -25,6 +25,7 @@
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);
+      goto('./biblioteca')
     } catch (e) {
       error = e.message;
     }
