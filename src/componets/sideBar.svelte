@@ -8,8 +8,8 @@
         <h2>Menu</h2>
       </div>
       <ul class="menu">
-        <li><a href="#">🏠 Home</a></li>
-        <li><a href="#">📚 I miei libri</a></li>
+        <li><a href="/home">🏠 Home</a></li>
+        <li><a href="/biblioteca">📚 I miei libri</a></li>
         <li><a href="#">🔖 Segnalibri</a></li>
         <li><a href="#">⚙️ Impostazioni</a></li>
         <li><a on:click={logOut}>📤 Logout</a></li>
@@ -85,6 +85,7 @@
     padding: 10px 15px;
     border-radius: 8px;
     transition: background 0.3s ease-in-out;
+    cursor: pointer;
   }
 
   .menu a:hover {

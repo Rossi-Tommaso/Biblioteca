@@ -25,7 +25,7 @@
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);
-      goto('./biblioteca')
+      goto('./home')
     } catch (e) {
       error = e.message;
     }

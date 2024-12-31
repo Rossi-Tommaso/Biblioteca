@@ -9,7 +9,7 @@ export let sign_up = writable(false);
 export const logOut = async () => {
   try {
     await signOut(auth);
-    user.set(null);
+    user.set(null); // Fix: Use the set method to update the writable store
     goto('/')
   } catch (error) {
     console.error("Error during logout:", error);
@@ -17,14 +17,13 @@ export const logOut = async () => {
 };
 
 onAuthStateChanged(auth, (firebaseUser) => {
-  user.set(
-    firebaseUser
-      ? {
-          uid: firebaseUser.uid,
-          displayName: firebaseUser.displayName,
-          email: firebaseUser.email,
-          photoURL: firebaseUser.photoURL,
-        }
-      : null
-  );
+  user.set(firebaseUser
+    ? {
+        uid: firebaseUser.uid,
+        displayName: firebaseUser.displayName,
+        email: firebaseUser.email,
+        photoURL: firebaseUser.photoURL,
+      }
+    : null
+  ); // Fix: Use the set method to update the writable store
 });

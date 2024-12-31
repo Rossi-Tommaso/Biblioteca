@@ -5,38 +5,44 @@
   import Loader from "../../componets/loader.svelte";
   import { user } from "../../stores/authStore";
   import { fetchDb, deleteOnDb } from "../../lib/db_scripts/db_functions";
+    import { onMount } from "svelte";
+
+  onMount(() => {
+    getBooks();
+  });
 
   let popup = true;
   let sideBarVisible;
   let popupBook;
   let loading = true;
+  let searchQuery = "";
+  let books = [];
+  let displayedBooks = [];
   let profilePhoto =
     user.photoURL ??
-    "data:image/png;base64,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";
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAclBMVEX///8AAACoqKj8/PwEBAT5+fn29vbl5eXz8/O1tbV1dXXY2NhTU1MiIiLp6enh4eHFxcVtbW2dnZ3Ozs4uLi43NzcbGxtJSUmXl5eRkZGJiYmsrKx5eXnR0dFCQkJXV1eBgYEQEBAnJydmZmYcHBy7u7vQ67L1AAAFXUlEVORw5CYII=";
 
   const togglepopup = (book) => {
     popupBook = book;
     popup = !popup;
   };
 
-  export let books = [];
-
   const getBooks = () => {
     loading = true;
-
     fetchDb("protectedData/books").then((data) => {
       books = data;
+      displayedBooks = data;
       loading = false;
-    })
+    });
   };
 
   $: {
-    books = fetchDb("protectedData/books").then((data) => {
+    fetchDb("protectedData/books").then((data) => {
       books = data;
+      displayedBooks = data;
       loading = false;
     });
   }
-  
 
   const addBook = () => {
     popup = !popup;
@@ -53,6 +59,16 @@
       getBooks();
     });
   };
+  
+  $: {
+  if (searchQuery.trim() === "") {
+    displayedBooks = books;
+  } else {
+    displayedBooks = books.filter(book =>
+      book.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+}
 </script>
 
 <div class="header">
@@ -70,39 +86,48 @@
 </div>
 
 <div class="content">
-
   {#if !popup}
     <PopUp bind:hidden={popup} bind:book={popupBook} bind:length={books.length} />
   {/if}
 
   <div class="top-actions">
-    <button class="add-book-button" on:click={addBook}>➕ Aggiungi Libro</button
-    >
+    <button class="add-book-button" on:click={addBook}>➕ Aggiungi Libro</button>
     <div class="search-bar">
-      <input type="text" placeholder="Cerca un libro..." />
+      <input 
+        type="text" 
+        placeholder="Cerca un libro..." 
+        bind:value={searchQuery}
+      />
     </div>
   </div>
+  
   <div class="book-grid">
     {#if !loading}
-      {#each books as book}
-        <div class="book-card">
-          <div class="cover-container">
-            <img
-              class="book-cover"
-              src={book.cover}
-              alt={`Copertina di ${book.title}`}
-            />
+      {#if displayedBooks.length > 0}
+        {#each displayedBooks as book}
+          <div class="book-card">
+            <div class="cover-container">
+              <img
+                class="book-cover"
+                src={book.cover}
+                alt={`Copertina di ${book.title}`}
+              />
+            </div>
+            <div class="book-info">
+              <p class="book-title">{book.title}</p>
+              <p class="book-author">di {book.author}</p>
+            </div>
+            <div class="actions">
+              <button on:click={() => editBook(book)}>Modifica</button>
+              <button on:click={() => removeBook(book)}>Rimuovi</button>
+            </div>
           </div>
-          <div class="book-info">
-            <p class="book-title">{book.title}</p>
-            <p class="book-author">di {book.author}</p>
-          </div>
-          <div class="actions">
-            <button on:click={() => editBook(book)}>Modifica</button>
-            <button on:click={() => removeBook(book)}>Rimuovi</button>
-          </div>
+        {/each}
+      {:else}
+        <div class="no-books">
+          <p>Nessun libro trovato</p>
         </div>
-      {/each}
+      {/if}
     {:else}
       <div class="loader-container">
         <Loader />

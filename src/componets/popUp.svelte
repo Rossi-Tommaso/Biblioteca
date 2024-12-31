@@ -8,6 +8,7 @@
         title: "",
         author: "",
         edition: "",
+        genre: "",
         comments: "",
         read: false,
         loaned: false,
@@ -30,6 +31,7 @@
                     title: "",
                     author: "",
                     edition: "",
+                    genre: "",
                     comments: "",
                     read: false,
                     loaned: false,
@@ -44,6 +46,7 @@
             author: "",
             edition: "",
             comments: "",
+            cover: "",
             read: false,
             loaned: false,
         };
@@ -71,8 +74,20 @@
                 <input type="text" bind:value={book.edition} />
             </label>
             <label>
+                Genere:
+                <input type="text" bind:value={book.genre} />
+            </label>
+            <label>
                 Commenti:
                 <textarea bind:value={book.comments}></textarea>
+            </label>
+            <label>
+                Copertina:
+                <input
+                    type="text"
+                    bind:value={book.cover}
+                    placeholder="Incolla il link del immagine di copertina"
+                />
             </label>
             <label>
                 Letto:
@@ -160,7 +175,7 @@
     .discard {
         background-color: red;
     }
-    
+
     .loader {
         width: 100%;
         display: flex;
