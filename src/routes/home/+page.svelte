@@ -7,10 +7,9 @@
     let sideBarVisible;
     let recentBooks = [];
     let loading = true;
-    let profilePhoto =
-      user.photoURL ??
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAclBMVEX///8AAACoqKj8/PwEBAT5+fn29vbl5eXz8/O1tbV1dXXY2NhTU1MiIiLp6enh4eHFxcVtbW2dnZ3Ozs4uLi43NzcbGxtJSUmXl5eRkZGJiYmsrKx5eXnR0dFCQkJXV1eBgYEQEBAnJydmZmYcHBy7u7vQ67L1AAAFXUlEVORw5CYII=";
-  
+    let profilePhoto = $user.photoURL ?? "/profile_placeholder.png";
+
+
     let stats = {
       totalBooks: 0,
       booksRead: 0,
@@ -44,16 +43,17 @@
       <h1>La Mia Biblioteca</h1>
     </div>
     <div class="header-right">
-      <div
+      <img
         class="profile-img"
-        style="background-image: url({profilePhoto});"
-      ></div>
+        src={profilePhoto}
+        alt="profile-placeholder"
+      >
     </div>
   </div>
   
   <div class="content">
     <div class="welcome-section">
-      <h2>{getCurrentTime()}, {user.displayName || 'Lettore'}!</h2>
+      <h2>{getCurrentTime()}, {$user.displayName || 'Lettore'}!</h2>
       <p>Benvenuto nella tua biblioteca personale</p>
     </div>
   
