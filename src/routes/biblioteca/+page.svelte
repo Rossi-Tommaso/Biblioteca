@@ -6,6 +6,7 @@
   import { user } from "../../stores/authStore";
   import { fetchDb, deleteOnDb } from "../../lib/db_scripts/db_functions";
   import { onMount } from "svelte";
+  
   // import { getPhotoFromSessionStorage } from "../../stores/authStore";
 
   onMount(() => {
@@ -23,7 +24,7 @@
   let books = [];
   let displayedBooks = [];
   let profilePhoto;
-  
+
   const togglepopup = (book) => {
     popupBook = book;
     popup = !popup;

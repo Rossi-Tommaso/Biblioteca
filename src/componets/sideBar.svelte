@@ -1,5 +1,6 @@
 <script>
   import { logOut } from "../stores/authStore";
+  import { finalUrl } from '$lib/helper';
 </script>
 
 <div class="layout">
@@ -8,8 +9,8 @@
         <h2>Menu</h2>
       </div>
       <ul class="menu">
-        <li><a href="/home">🏠 Home</a></li>
-        <li><a href="/biblioteca">📚 I miei libri</a></li>
+        <li><a href={finalUrl("/")}>🏠 Home</a></li>
+        <li><a href={finalUrl("/biblioteca")}>📚 I miei libri</a></li>
         <li><a href="#">🔖 Segnalibri</a></li>
         <li><a href="#">⚙️ Impostazioni</a></li>
         <li><a on:click={logOut}>📤 Logout</a></li>
