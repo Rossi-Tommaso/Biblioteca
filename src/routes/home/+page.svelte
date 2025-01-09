@@ -23,13 +23,13 @@
 
     onMount(() => {
       profilePhoto = $user.photoURL ?? "profile_placeholder.png";
-      fetchDb("protectedData/books").then((data) => {
-        recentBooks = data.slice(0, 3);
-        stats.totalBooks = data.length;
-        stats.booksRead = data.filter((book) => book.read).length;
-        stats.unread = data.filter((book) => !book.read).length;
-        loading = false;
-      });
+      // fetchDb("protectedData/books").then((data) => {
+      //   recentBooks = data.slice(0, 3);
+      //   stats.totalBooks = data.length;
+      //   stats.booksRead = data.filter((book) => book.read).length;
+      //   stats.unread = data.filter((book) => !book.read).length;
+      //   loading = false;
+      // });
 
       console.log("DEV:", dev)
     });

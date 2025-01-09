@@ -7,7 +7,7 @@
 
 <LoginGradient />
 
-<div class="center-VO" id="v1.2">
+<div class="center-VO" id="v1.3">
     {#if !$sign_up}
         <Login />
     {:else}
