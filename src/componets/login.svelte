@@ -3,6 +3,7 @@
   import { signInWithEmailAndPassword, signInWithPopup,onAuthStateChanged } from "firebase/auth";
   import { sign_up, user } from "../stores/authStore";
   import { goto } from "$app/navigation"
+  import { base } from '$app/paths';
 
   let email = "";
   let password = "";
@@ -16,8 +17,7 @@
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-
-      // goto('/home')
+      goto("{base}/home")
     } catch (err) {
       error = err.message;
     }
@@ -47,7 +47,7 @@
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);
-      goto('/home')
+      goto("{base}/home")
     } catch (e) {
       error = e.message;
     }
