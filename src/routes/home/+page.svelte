@@ -22,8 +22,8 @@
     };
 
     onMount(() => {
-      //profilePhoto = $user.photoURL ?? "profile_placeholder.png";
-      profilePhoto = "profile_placeholder.png";
+      profilePhoto = $user?.photoURL ?? "profile_placeholder.png";
+      console.log(profilePhoto)
       fetchDb("protectedData/books").then((data) => {
         console.log("DATAfrom db:", data)
         recentBooks = data.slice(0, 3);

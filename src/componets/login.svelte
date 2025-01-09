@@ -1,7 +1,7 @@
 <script>
   import { auth, googleProvider, appleProvider } from "../lib/firebase.config";
-  import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-  import { sign_up } from "../stores/authStore";
+  import { signInWithEmailAndPassword, signInWithPopup,onAuthStateChanged } from "firebase/auth";
+  import { sign_up, user } from "../stores/authStore";
   import { goto } from "$app/navigation"
 
   let email = "";
@@ -16,16 +16,38 @@
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      goto('./biblioteca')
+
+      // goto('/home')
     } catch (err) {
       error = err.message;
     }
   };
 
+
+  onAuthStateChanged(auth, (firebaseUser) => {
+  if (firebaseUser) {
+    const userData = {
+      uid: firebaseUser.uid,
+      displayName: firebaseUser.displayName,
+      email: firebaseUser.email,
+      photoURL: firebaseUser.photoURL,
+    };
+
+    console.log("USER STORE OK")
+    $user = userData;
+    //savePhotoToSessionStorage(userData.photoURL);
+  } else {
+    console.log("USER STORE NULL")
+    $user = null;
+  }
+});
+
+
+
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);
-      goto('./home')
+      goto('/home')
     } catch (e) {
       error = e.message;
     }
@@ -76,7 +98,7 @@
     <button
       type="button"
       class="btn google"
-      on:click={() => signInWith(googleProvider)}
+      on:click={async () => await signInWith(googleProvider)}
     >
       <svg
         version="1.1"

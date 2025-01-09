@@ -37,21 +37,23 @@ export const logOut = async () => {
 //   }
 // }
 
-onAuthStateChanged(auth, (firebaseUser) => {
-  if (firebaseUser) {
-    const userData = {
-      uid: firebaseUser.uid,
-      displayName: firebaseUser.displayName,
-      email: firebaseUser.email,
-      photoURL: firebaseUser.photoURL,
-    };
+// onAuthStateChanged(auth, (firebaseUser) => {
+//   if (firebaseUser) {
+//     const userData = {
+//       uid: firebaseUser.uid,
+//       displayName: firebaseUser.displayName,
+//       email: firebaseUser.email,
+//       photoURL: firebaseUser.photoURL,
+//     };
 
-    user.set(userData);
-    //savePhotoToSessionStorage(userData.photoURL);
-  } else {
-    user.set(null);
-  }
-});
+//     console.log("USER STORE OK")
+//     user.set(userData);
+//     //savePhotoToSessionStorage(userData.photoURL);
+//   } else {
+//     console.log("USER STORE NULL")
+//     user.set(null);
+//   }
+// });
 
 //export const getPhotoFromSessionStorage = () => {
 //  return sessionStorage.getItem("photoURL");
