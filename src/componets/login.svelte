@@ -17,7 +17,7 @@
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      goto("{base}/home")
+      goto(`${base}/home`)
     } catch (err) {
       error = err.message;
     }
@@ -47,7 +47,7 @@
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);
-      goto("{base}/home")
+      goto(`${base}/home`)
     } catch (e) {
       error = e.message;
     }
