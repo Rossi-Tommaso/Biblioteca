@@ -4,14 +4,14 @@
     import { user } from "../../stores/authStore";
     import { fetchDb } from "../../lib/db_scripts/db_functions";
     import { onMount } from "svelte";
-    import { finalUrl } from '$lib/helper';
+    import { base } from '$app/paths';
     //import { getPhotoFromSessionStorage } from "../../stores/authStore";
 
     
   
     let sideBarVisible;
     let recentBooks = [];
-    let loading = true;
+    let loading = false;
     let profilePhoto;
     
 
@@ -30,8 +30,6 @@
       //   stats.unread = data.filter((book) => !book.read).length;
       //   loading = false;
       // });
-
-      console.log("DEV:", dev)
     });
   
     const getCurrentTime = () => {
@@ -110,11 +108,11 @@
     <div class="quick-actions">
       <h2>Azioni Rapide</h2>
       <div class="actions-grid">
-        <a href={finalUrl('/biblioteca')} class="action-card">
+        <a href="{base}/biblioteca" class="action-card">
           <span class="icon">📚</span>
           <span class="text">Visualizza Biblioteca</span>
         </a>
-        <a href={finalUrl('/biblioteca')} class="action-card">
+        <a href="{base}/biblioteca" class="action-card">
           <span class="icon">➕</span>
           <span class="text">Aggiungi Libro</span>
         </a>

@@ -6,16 +6,20 @@ const config = {
 		adapter: adapter({
             pages: 'docs',
             assets: 'docs',
-            fallback: undefined,
+            fallback: null,
             precompress: false,
-            strict: true
+            strict: true,
+			trailingSlash: 'always'
         }),
-		prerender: {
-			handleHttpError: ({ path, referrer, message }) => {
-				// ignore deliberate link to shiny 404 page
-					return;
-			}
+		paths: {
+			base: process.env.NODE_ENV === "production" ? "/Biblioteca" : ""
 		}
+		// prerender: {
+		// 	handleHttpError: ({ path, referrer, message }) => {
+		// 		// ignore deliberate link to shiny 404 page
+		// 			return;
+		// 	}
+		// }
 	}
 };
 
