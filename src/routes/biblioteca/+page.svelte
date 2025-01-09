@@ -5,10 +5,14 @@
   import Loader from "../../componets/loader.svelte";
   import { user } from "../../stores/authStore";
   import { fetchDb, deleteOnDb } from "../../lib/db_scripts/db_functions";
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
+  // import { getPhotoFromSessionStorage } from "../../stores/authStore";
 
   onMount(() => {
     getBooks();
+    profilePhoto = $user.photoURL ??
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAclBMVEX///8AAACoqKj8/PwEBAT5+fn29vbl5eXz8/O1tbV1dXXY2NhTU1MiIiLp6enh4eHFxcVtbW2dnZ3Ozs4uLi43NzcbGxtJSUmXl5eRkZGJiYmsrKx5eXnR0dFCQkJXV1eBgYEQEBAnJydmZmYcHBy7u7vQ67L1AAAFXUlEVORw5CYII=";
+
   });
 
   let popup = true;
@@ -18,10 +22,8 @@
   let searchQuery = "";
   let books = [];
   let displayedBooks = [];
-  let profilePhoto =
-    user.photoURL ??
-    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAclBMVEX///8AAACoqKj8/PwEBAT5+fn29vbl5eXz8/O1tbV1dXXY2NhTU1MiIiLp6enh4eHFxcVtbW2dnZ3Ozs4uLi43NzcbGxtJSUmXl5eRkZGJiYmsrKx5eXnR0dFCQkJXV1eBgYEQEBAnJydmZmYcHBy7u7vQ67L1AAAFXUlEVORw5CYII=";
-
+  let profilePhoto;
+  
   const togglepopup = (book) => {
     popupBook = book;
     popup = !popup;
@@ -59,16 +61,16 @@
       getBooks();
     });
   };
-  
+
   $: {
-  if (searchQuery.trim() === "") {
-    displayedBooks = books;
-  } else {
-    displayedBooks = books.filter(book =>
-      book.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    if (searchQuery.trim() === "") {
+      displayedBooks = books;
+    } else {
+      displayedBooks = books.filter((book) =>
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    }
   }
-}
 </script>
 
 <div class="header">
@@ -87,20 +89,25 @@
 
 <div class="content">
   {#if !popup}
-    <PopUp bind:hidden={popup} bind:book={popupBook} bind:length={books.length} />
+    <PopUp
+      bind:hidden={popup}
+      bind:book={popupBook}
+      bind:length={books.length}
+    />
   {/if}
 
   <div class="top-actions">
-    <button class="add-book-button" on:click={addBook}>➕ Aggiungi Libro</button>
+    <button class="add-book-button" on:click={addBook}>➕ Aggiungi Libro</button
+    >
     <div class="search-bar">
-      <input 
-        type="text" 
-        placeholder="Cerca un libro..." 
+      <input
+        type="text"
+        placeholder="Cerca un libro..."
         bind:value={searchQuery}
       />
     </div>
   </div>
-  
+
   <div class="book-grid">
     {#if !loading}
       {#if displayedBooks.length > 0}

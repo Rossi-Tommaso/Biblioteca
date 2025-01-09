@@ -3,30 +3,31 @@
     import SideBar from "../../componets/sideBar.svelte";
     import { user } from "../../stores/authStore";
     import { fetchDb } from "../../lib/db_scripts/db_functions";
+    import { onMount } from "svelte";
+    //import { getPhotoFromSessionStorage } from "../../stores/authStore";
   
     let sideBarVisible;
     let recentBooks = [];
     let loading = true;
-    let profilePhoto = $user.photoURL ?? "/profile_placeholder.png";
-
+    let profilePhoto;
+    
 
     let stats = {
       totalBooks: 0,
       booksRead: 0,
       unread: 0,
     };
-  
-    // Fetch recent books and stats
-    $: {
-    fetchDb("protectedData/books").then((data) => {
-      recentBooks = data;
-      stats.totalBooks = recentBooks.length;
-      stats.booksRead = recentBooks.filter(book => book.read === true).length;
-      stats.unread = recentBooks.filter(book => book.read === false).length;
-      recentBooks = recentBooks.slice(0, 3);
-      loading = false;
+
+    onMount(() => {
+      profilePhoto = $user.photoURL ?? "profile_placeholder.png";//getPhotoFromSessionStorage ?? "profile_placeholder.png";
+      fetchDb("protectedData/books").then((data) => {
+        recentBooks = data.slice(0, 3);
+        stats.totalBooks = data.length;
+        stats.booksRead = data.filter((book) => book.read).length;
+        stats.unread = data.filter((book) => !book.read).length;
+        loading = false;
+      });
     });
-  }
   
     const getCurrentTime = () => {
       const hour = new Date().getHours();
@@ -53,7 +54,7 @@
   
   <div class="content">
     <div class="welcome-section">
-      <h2>{getCurrentTime()}, {$user.displayName || 'Lettore'}!</h2>
+      <h2>{getCurrentTime()}, {$user?.displayName || 'Lettore'}!</h2>
       <p>Benvenuto nella tua biblioteca personale</p>
     </div>
   
@@ -104,11 +105,11 @@
     <div class="quick-actions">
       <h2>Azioni Rapide</h2>
       <div class="actions-grid">
-        <a href="../biblioteca" class="action-card">
+        <a href="/biblioteca" class="action-card">
           <span class="icon">📚</span>
           <span class="text">Visualizza Biblioteca</span>
         </a>
-        <a href="../Biblioteca" class="action-card">
+        <a href="/biblioteca" class="action-card">
           <span class="icon">➕</span>
           <span class="text">Aggiungi Libro</span>
         </a>

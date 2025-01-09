@@ -16,14 +16,43 @@ export const logOut = async () => {
   }
 };
 
+// const savePhotoToSessionStorage = async (photoURL) => {
+//   try {
+//   const response = await fetch(photoURL);
+//   if (!response.ok) {
+//     user.set({ ...user, photoURL: null }); 
+//     return;
+//   }
+
+//   const blob = await response.blob(); // convert the response to a blob (binary large object) that represents the binary data of the image
+//   const reader = new FileReader(); // create a new FileReader object
+
+//   reader.onload = () => {
+//     sessionStorage.setItem("photoURL", reader.result); // store the image in the sessionStorage
+//   };
+
+//   reader.readAsDataURL(blob); 
+//   } catch (error) {
+//     console.error("Error saving photo to session storage:", error);
+//   }
+// }
+
 onAuthStateChanged(auth, (firebaseUser) => {
-  user.set(firebaseUser
-    ? {
-        uid: firebaseUser.uid,
-        displayName: firebaseUser.displayName,
-        email: firebaseUser.email,
-        photoURL: firebaseUser.photoURL,
-      }
-    : null
-  ); // Fix: Use the set method to update the writable store
+  if (firebaseUser) {
+    const userData = {
+      uid: firebaseUser.uid,
+      displayName: firebaseUser.displayName,
+      email: firebaseUser.email,
+      photoURL: firebaseUser.photoURL,
+    };
+
+    user.set(userData);
+    //savePhotoToSessionStorage(userData.photoURL);
+  } else {
+    user.set(null);
+  }
 });
+
+//export const getPhotoFromSessionStorage = () => {
+//  return sessionStorage.getItem("photoURL");
+//};
