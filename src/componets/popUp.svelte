@@ -6,8 +6,11 @@
     export let length;
     export let book = {
         title: "",
-        author: "",
-        edition: "",
+        authorName: "",
+        authorSurname: "",
+        editor: "",
+        place: "",
+        year: "",
         genre: "",
         comments: "",
         read: false,
@@ -16,10 +19,10 @@
 
     let loading = false;
 
-    function saveChanges() {
+    async function saveChanges() {
         loading = true;
         length = book.id ?? length;
-        updateDb(`protectedData/books/${length}`, { ...book, id: length })
+        await updateDb(`protectedData/books/${length}`, { ...book, id: length })
             .then(() => {
                 loading = false;
                 hidden = true;
@@ -29,8 +32,11 @@
                 loading = false;
                 book = {
                     title: "",
-                    author: "",
-                    edition: "",
+                    authorName: "",
+                    authorSurname: "",
+                    editor: "",
+                    year: "",
+                    place: "",
                     genre: "",
                     comments: "",
                     read: false,
@@ -43,10 +49,13 @@
         hidden = true;
         book = {
             title: "",
-            author: "",
-            edition: "",
+            authorName: "",
+            authorSurname: "",
+            editor: "",
+            year: "",
+            place: "",
+            genre: "",
             comments: "",
-            cover: "",
             read: false,
             loaned: false,
         };
@@ -67,11 +76,28 @@
             </label>
             <label>
                 Autore:
-                <input type="text" bind:value={book.author} />
+                <input
+                    type="text"
+                    placeholder="Nome"
+                    bind:value={book.authorName}
+                />
+                <input
+                    type="text"
+                    placeholder="Cognome"
+                    bind:value={book.authorSurname}
+                />
             </label>
             <label>
-                Edizione:
-                <input type="text" bind:value={book.edition} />
+                Editore:
+                <input type="text" bind:value={book.editor} />
+            </label>
+            <label>
+                Luogo:
+                <input type="text" bind:value={book.place} />
+            </label>
+            <label>
+                Anno:
+                <input type="number" bind:value={book.year} />
             </label>
             <label>
                 Genere:

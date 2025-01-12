@@ -2,6 +2,7 @@
   import PopUp from "../../componets/popUp.svelte";
   import Hamburger from "../../componets/hamburger.svelte";
   import SideBar from "../../componets/sideBar.svelte";
+  import { sidebarVisible } from "../../stores/utilsStore";
   import Loader from "../../componets/loader.svelte";
   import { user } from "../../stores/authStore";
   import { fetchDb, deleteOnDb } from "../../lib/db_scripts/db_functions";
@@ -17,7 +18,6 @@
   });
 
   let popup = true;
-  let sideBarVisible;
   let popupBook;
   let loading = true;
   let searchQuery = "";
@@ -55,9 +55,9 @@
     togglepopup(book);
   };
 
-  const removeBook = (book) => {
+  const removeBook = async (book) => {
     loading = true;
-    deleteOnDb(`protectedData/books/${book.id}`).then(() => {
+    await deleteOnDb(`protectedData/books/${book.id}`).then(() => {
       loading = false;
       getBooks();
     });
@@ -73,20 +73,6 @@
     }
   }
 </script>
-
-<div class="header">
-  <Hamburger bind:check={sideBarVisible} />
-
-  <div class="header-left">
-    <h1>La Mia Biblioteca</h1>
-  </div>
-  <div class="header-right">
-    <div
-      class="profile-img"
-      style="background-image: url({profilePhoto});"
-    ></div>
-  </div>
-</div>
 
 <div class="content">
   {#if !popup}
@@ -144,7 +130,7 @@
   </div>
 </div>
 
-{#if sideBarVisible}
+{#if $sidebarVisible}
   <SideBar />
 {/if}
 

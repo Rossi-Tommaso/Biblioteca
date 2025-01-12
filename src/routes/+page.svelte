@@ -4,6 +4,10 @@
     import LoginGradient from "../componets/loginGradient.svelte";
     import { sign_up } from "../stores/authStore"
 </script>
+<script context="module">
+    export const hideHeader = true;
+</script>
+
 
 <LoginGradient />
 

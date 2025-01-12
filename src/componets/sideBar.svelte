@@ -1,6 +1,7 @@
 <script>
   import { logOut } from "../stores/authStore";
   import { base } from '$app/paths';
+  import { Home, Book, Bookmark, Settings, LogOut  } from "lucide-svelte";
 </script>
 
 <div class="layout">
@@ -9,14 +10,15 @@
         <h2>Menu</h2>
       </div>
       <ul class="menu">
-        <li><a href="{base}/home">🏠 Home</a></li>
-        <li><a href="{base}/biblioteca">📚 I miei libri</a></li>
-        <li><a href="#">🔖 Segnalibri</a></li>
-        <li><a href="#">⚙️ Impostazioni</a></li>
-        <li><a on:click={logOut}>📤 Logout</a></li>
+        <li><a href="{base}/home"><Home /> Home</a></li>
+        <li><a href="{base}/biblioteca"><Book /> I miei libri</a></li>
+        <li><a href="#"><Bookmark /> Segnalibri</a></li>
+        <li><a href="#"><Settings /> Impostazioni</a></li>
+        <li><a on:click={logOut}><LogOut /> Logout</a></li>
       </ul>
     </div>
   </div>
+
 
   <style>
     .layout {

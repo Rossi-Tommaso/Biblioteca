@@ -1,18 +1,16 @@
 <script>
     import Hamburger from "../../componets/hamburger.svelte";
     import SideBar from "../../componets/sideBar.svelte";
+    import { sidebarVisible } from "../../stores/utilsStore";
     import { user } from "../../stores/authStore";
     import { fetchDb } from "../../lib/db_scripts/db_functions";
     import { onMount } from "svelte";
     import { base } from '$app/paths';
+    import { Settings, LogOut, Plus, Library  } from "lucide-svelte";
     //import { getPhotoFromSessionStorage } from "../../stores/authStore";
-
-    
   
-    let sideBarVisible;
     let recentBooks = [];
     let loading = true;
-    let profilePhoto;
     
 
     let stats = {
@@ -21,10 +19,8 @@
       unread: 0,
     };
 
-    onMount(() => {
-      profilePhoto = $user?.photoURL ?? "profile_placeholder.png";
-      console.log(profilePhoto)
-      fetchDb("protectedData/books").then((data) => {
+    onMount(async () => {
+      await fetchDb("protectedData/books").then((data) => {
         console.log("DATAfrom db:", data)
         recentBooks = data.slice(0, 3);
         stats.totalBooks = data.length;
@@ -41,22 +37,7 @@
       return "Buonasera";
     };
   </script>
-  
-  <div class="header">
-    <Hamburger bind:check={sideBarVisible} />
-  
-    <div class="header-left">
-      <h1>La Mia Biblioteca</h1>
-    </div>
-    <div class="header-right">
-      <img
-        class="profile-img"
-        src={profilePhoto}
-        alt="profile-placeholder"
-      >
-    </div>
-  </div>
-  
+
   <div class="content">
     <div class="welcome-section">
       <h2>{getCurrentTime()}, {$user?.displayName || 'Lettore'}!</h2>
@@ -111,22 +92,22 @@
       <h2>Azioni Rapide</h2>
       <div class="actions-grid">
         <a href="{base}/biblioteca" class="action-card">
-          <span class="icon">📚</span>
+          <span class="icon"><Library /></span>
           <span class="text">Visualizza Biblioteca</span>
         </a>
         <a href="{base}/biblioteca" class="action-card">
-          <span class="icon">➕</span>
+          <span class="icon"><Plus /></span>
           <span class="text">Aggiungi Libro</span>
         </a>
         <a href="#" class="action-card">
-          <span class="icon">👤</span>
+          <span class="icon"><Settings /></span>
           <span class="text">Profilo</span>
         </a>
       </div>
     </div>
   </div>
   
-  {#if sideBarVisible}
+  {#if $sidebarVisible}
     <SideBar />
   {/if}
   
@@ -140,38 +121,6 @@
       font-family: "Poppins", sans-serif;
       background-color: #f8f9fa;
       color: #333;
-    }
-  
-    .header {
-      background: linear-gradient(90deg, #6a11cb, #ff8a65);
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 30px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-  
-    .header-left h1 {
-      margin: 0;
-      font-size: 2rem;
-      font-weight: 700;
-    }
-  
-    .header-right {
-      display: flex;
-      align-items: center;
-    }
-  
-    .profile-img {
-      background-size: cover;
-      background-position: center;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      border: 2px solid #fff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
   
     .content {

@@ -3,7 +3,7 @@ import { db } from '../firebase.config.js';
 
 //'users/53BdModGCwex0cSwcs8dJM997AQ2/role': 'ADMIN', // role structure example
 
-export let assignRole = (uid, role, email) => {
+export let assignRole = async (uid, role, email) => {
   if (!uid || !role) {
     console.error('UID o ruolo non forniti.');
     return;
@@ -11,7 +11,7 @@ export let assignRole = (uid, role, email) => {
 
   let updates = { [`users/${uid}/role`]: role };
 
-  update(ref(db), updates)
+  await update(ref(db), updates)
     .then(() => {
       console.log('Dati aggiunti o aggiornati con successo');
     })
@@ -25,7 +25,7 @@ export let assignRole = (uid, role, email) => {
 
     updates = { [`users/${uid}/email`]: email };
 
-    update(ref(db), updates)
+    await update(ref(db), updates)
       .then(() => {
         console.log('Dati aggiunti o aggiornati con successo');
       })
