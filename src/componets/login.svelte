@@ -1,6 +1,6 @@
 <script>
-  import { auth, googleProvider, appleProvider } from "../lib/firebase.config";
-  import { signInWithEmailAndPassword, signInWithPopup,onAuthStateChanged } from "firebase/auth";
+  import { auth, googleProvider } from "../lib/firebase.config";
+  import { signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged } from "firebase/auth";
   import { sign_up, user } from "../stores/authStore";
   import { goto } from "$app/navigation"
   import { base } from '$app/paths';
@@ -139,7 +139,7 @@ C318.115,0,375.068,22.126,419.404,58.936z"
       </svg>
       Google
     </button>
-    <button
+    <!-- <button
       type="button"
       class="btn apple"
       on:click={() => signInWith(appleProvider)}
@@ -169,7 +169,7 @@ C318.115,0,375.068,22.126,419.404,58.936z"
         ></svg
       >
       Apple
-    </button>
+    </button> -->
   </div>
   {#if error}
     <p style="color: red;">{error}</p>

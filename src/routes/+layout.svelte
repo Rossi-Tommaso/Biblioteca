@@ -1,14 +1,29 @@
 <script>
+    import SimpleLoader from '../componets/simpleLoader.svelte';
     import { user } from '../stores/authStore';
     import Hamburger from '../componets/hamburger.svelte';
     import { page } from '$app/stores';
     import { base } from '$app/paths';
+    import { logOut } from "../stores/authStore";
     
     let profilePhoto;
+    let loading = true;
 
     $: profilePhoto = $user?.photoURL ?? "profile_placeholder.png";
       
     $: hideHeader = $page?.route?.id === `${base}/`;
+
+    $: {
+      if (!$user && $page?.route?.id === `${base}/`){
+        loading = false;
+        console.log($user)
+      } else if (!$user){
+        loading = true;
+        console.log($user)
+      } else {
+        loading = false;
+      }
+    };
       
 </script>
 
@@ -29,11 +44,20 @@
           </div>
         </div>
 </header>
-{/if}	
+{/if}	 
 
-<main>
-    <slot />
-</main>
+{#if !loading}
+  <main>
+      <slot />
+  </main>
+{:else}
+<div class="center-VO loading">
+  <SimpleLoader />
+  <h2>Loading user data</h2>
+  <button class="action-link" on:click={async () => await logOut()}>Esci</button>
+</div>
+{/if}
+
 
 <style>
     :global(*) {
@@ -48,10 +72,6 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-    }
-
-    :global(body) {
-        /* existing styles */
     }
 
     header {
@@ -88,5 +108,27 @@
       border: 2px solid #fff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .action-link {
+      background: linear-gradient(45deg, #6a11cb, #ff8a65);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+  
+    .action-link:hover {
+      background: linear-gradient(45deg, #ff8a65, #6a11cb);
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
     }
 </style>

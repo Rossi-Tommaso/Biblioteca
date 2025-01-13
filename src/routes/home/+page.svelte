@@ -1,5 +1,5 @@
 <script>
-    import Hamburger from "../../componets/hamburger.svelte";
+    import SimpleLoader from "../../componets/simpleLoader.svelte";
     import SideBar from "../../componets/sideBar.svelte";
     import { sidebarVisible } from "../../stores/utilsStore";
     import { user } from "../../stores/authStore";
@@ -81,9 +81,7 @@
         {:else if !loading}
           <p class="no-books">Nessun libro nella tua biblioteca</p>
         {:else}
-          <div class="loader-container">
-            <div class="loader"></div>
-          </div>
+          <SimpleLoader />
         {/if}
       </div>
     </div>
@@ -99,9 +97,9 @@
           <span class="icon"><Plus /></span>
           <span class="text">Aggiungi Libro</span>
         </a>
-        <a href="#" class="action-card">
+        <a href="/impostazioni" class="action-card">
           <span class="icon"><Settings /></span>
-          <span class="text">Profilo</span>
+          <span class="text">Impostazioni</span>
         </a>
       </div>
     </div>
@@ -170,11 +168,6 @@
       -webkit-text-fill-color: transparent;
     }
   
-    .stat-text {
-      font-size: 1.5rem;
-      color: #666;
-    }
-  
     .recent-books-section {
       margin-bottom: 40px;
     }
@@ -231,11 +224,6 @@
       margin: 5px 0;
     }
   
-    .added-date {
-      font-size: 0.9rem;
-      color: #999;
-    }
-  
     .actions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -265,51 +253,5 @@
   
     .icon {
       font-size: 2rem;
-    }
-  
-    .loader-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      padding: 40px 0;
-    }
-  
-    .loader {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #6a11cb;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-  
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  
-    .no-books {
-      text-align: center;
-      color: #666;
-      grid-column: 1 / -1;
-      padding: 40px;
-    }
-  
-    @media (max-width: 768px) {
-      .welcome-section h2 {
-        font-size: 2rem;
-      }
-  
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-  
-      .recent-books-grid {
-        grid-template-columns: 1fr;
-      }
-  
-      .actions-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
   </style>

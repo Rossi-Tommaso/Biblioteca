@@ -14,7 +14,7 @@
         <li><a href="{base}/biblioteca"><Book /> I miei libri</a></li>
         <li><a href="#"><Bookmark /> Segnalibri</a></li>
         <li><a href="#"><Settings /> Impostazioni</a></li>
-        <li><a on:click={logOut}><LogOut /> Logout</a></li>
+        <li><a on:click={async () => await logOut()}><LogOut /> Logout</a></li>
       </ul>
     </div>
   </div>
