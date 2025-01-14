@@ -1,20 +1,19 @@
 <script>
   import PopUp from "../../componets/popUp.svelte";
-  import Hamburger from "../../componets/hamburger.svelte";
   import SideBar from "../../componets/sideBar.svelte";
   import { sidebarVisible } from "../../stores/utilsStore";
   import Loader from "../../componets/loader.svelte";
   import { user } from "../../stores/authStore";
-  import { fetchDb, deleteOnDb } from "../../lib/db_scripts/db_functions";
+  import { fetchDb, deleteOnDb, isAdmin } from "../../lib/db_scripts/db_functions";
   import { onMount } from "svelte";
+  import { Plus } from "lucide-svelte";
   
   // import { getPhotoFromSessionStorage } from "../../stores/authStore";
 
-  onMount(() => {
-    getBooks();
-    profilePhoto = $user.photoURL ??
-    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAclBMVEX///8AAACoqKj8/PwEBAT5+fn29vbl5eXz8/O1tbV1dXXY2NhTU1MiIiLp6enh4eHFxcVtbW2dnZ3Ozs4uLi43NzcbGxtJSUmXl5eRkZGJiYmsrKx5eXnR0dFCQkJXV1eBgYEQEBAnJydmZmYcHBy7u7vQ67L1AAAFXUlEVORw5CYII=";
-
+  onMount(async () => {
+    await getBooks();
+    profilePhoto = $user.photoURL ?? "/profile_placeholder.png";
+    userRole = await isAdmin($user.uid) //return true if user is admin
   });
 
   let popup = true;
@@ -24,6 +23,7 @@
   let books = [];
   let displayedBooks = [];
   let profilePhoto;
+  let userRole;
 
   const togglepopup = (book) => {
     popupBook = book;
@@ -74,6 +74,10 @@
   }
 </script>
 
+{#if userRole}
+<button class="add-book-button" on:click={addBook}><Plus size=40/> </button>
+{/if}
+
 <div class="content">
   {#if !popup}
     <PopUp
@@ -84,8 +88,6 @@
   {/if}
 
   <div class="top-actions">
-    <button class="add-book-button" on:click={addBook}>➕ Aggiungi Libro</button
-    >
     <div class="search-bar">
       <input
         type="text"
@@ -111,10 +113,12 @@
               <p class="book-title">{book.title}</p>
               <p class="book-author">di {book.author}</p>
             </div>
-            <div class="actions">
-              <button on:click={() => editBook(book)}>Modifica</button>
-              <button on:click={() => removeBook(book)}>Rimuovi</button>
-            </div>
+            {#if userRole}
+              <div class="actions">
+                <button on:click={() => editBook(book)}>Modifica</button>
+                <button on:click={() => removeBook(book)}>Rimuovi</button>
+              </div>
+            {/if}
           </div>
         {/each}
       {:else}
@@ -205,21 +209,25 @@
 
   .add-book-button {
     background: linear-gradient(45deg, #ff8a65, #6a11cb);
+    position: fixed;
+    bottom: 7.5vh;
+    right: 22.5vw;
     color: #fff;
     border: none;
-    border-radius: 30px;
-    padding: 12px 25px;
-    font-size: 1.2rem;
-    font-weight: 600;
+    border-radius: 100%;
+    aspect-ratio: 1;
+    padding: 1em;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transition:
       transform 0.2s ease,
       box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
   }
 
   .add-book-button:hover {
-    transform: scale(1.05);
+    background: linear-gradient(45deg, #6a11cb, #ff8a65);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }
 

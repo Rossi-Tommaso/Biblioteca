@@ -38,5 +38,11 @@ const deleteOnDb = async (path) => {
     }
 }
 
-export { fetchDb, writeDb, updateDb, deleteOnDb };
+const isAdmin = async (uid) => {
+    const path = `users/${uid}/role`;
+    const role = await fetchDb(path);
+    return role === 'ADMIN';
+}
+
+export { fetchDb, writeDb, updateDb, deleteOnDb, isAdmin };
 

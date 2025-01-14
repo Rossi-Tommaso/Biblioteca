@@ -16,6 +16,24 @@ export const logOut = async () => {
   }
 };
 
+onAuthStateChanged(auth, (firebaseUser) => {
+  if (firebaseUser) {
+    const userData = {
+      uid: firebaseUser.uid,
+      displayName: firebaseUser.displayName,
+      email: firebaseUser.email,
+      photoURL: firebaseUser.photoURL,
+    };
+
+    console.log("USER STORE OK");
+    user.set(userData); // Usa il metodo set per aggiornare lo store
+  } else {
+    console.log("USER STORE NULL");
+    user.set(null); // Usa il metodo set per resettare lo store
+  }
+});
+
+
 // const savePhotoToSessionStorage = async (photoURL) => {
 //   try {
 //   const response = await fetch(photoURL);

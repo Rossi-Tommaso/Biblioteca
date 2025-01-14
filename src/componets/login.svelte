@@ -23,27 +23,6 @@
     }
   };
 
-
-  onAuthStateChanged(auth, (firebaseUser) => {
-  if (firebaseUser) {
-    const userData = {
-      uid: firebaseUser.uid,
-      displayName: firebaseUser.displayName,
-      email: firebaseUser.email,
-      photoURL: firebaseUser.photoURL,
-    };
-
-    console.log("USER STORE OK")
-    $user = userData;
-    //savePhotoToSessionStorage(userData.photoURL);
-  } else {
-    console.log("USER STORE NULL")
-    $user = null;
-  }
-});
-
-
-
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);

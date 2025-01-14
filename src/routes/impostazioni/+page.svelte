@@ -138,6 +138,7 @@
       color: #fff;
       padding: 10px 20px;
       border-radius: 8px;
+      border: none;
       text-decoration: none;
       display: inline-block;
       font-size: 0.9rem;

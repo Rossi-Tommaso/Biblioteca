@@ -8,7 +8,6 @@
     export const hideHeader = true;
 </script>
 
-
 <LoginGradient />
 
 <div class="center-VO" id="v1.9">

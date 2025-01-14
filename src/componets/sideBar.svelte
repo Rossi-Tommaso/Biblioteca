@@ -10,11 +10,10 @@
         <h2>Menu</h2>
       </div>
       <ul class="menu">
-        <li><a href="{base}/home"><Home /> Home</a></li>
-        <li><a href="{base}/biblioteca"><Book /> I miei libri</a></li>
-        <li><a href="#"><Bookmark /> Segnalibri</a></li>
-        <li><a href="#"><Settings /> Impostazioni</a></li>
-        <li><a on:click={async () => await logOut()}><LogOut /> Logout</a></li>
+        <li><Home /><a href="{base}/home"> Home</a></li>
+        <li><Book /><a href="{base}/biblioteca"> I miei libri</a></li>
+        <li><Settings /><a href="#"> Impostazioni</a></li>
+        <li><LogOut /><a on:click={async () => await logOut()}> Logout</a></li>
       </ul>
     </div>
   </div>
@@ -79,6 +78,8 @@
   }
 
   .menu li {
+    display: flex;
+    align-items: center;
     font-size: 1.2rem;
   }
 
