@@ -44,5 +44,11 @@ const isAdmin = async (uid) => {
     return role === 'ADMIN';
 }
 
-export { fetchDb, writeDb, updateDb, deleteOnDb, isAdmin };
+const getBiblioteche = async (uid) => {
+    const path = `protectedData/`;
+    console.log(await fetchDb(path));
+    return
+}
+
+export { fetchDb, writeDb, updateDb, deleteOnDb, isAdmin, getBiblioteche };
 

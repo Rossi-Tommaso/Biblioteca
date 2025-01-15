@@ -4,6 +4,7 @@
   import { sign_up, user } from "../stores/authStore";
   import { goto } from "$app/navigation"
   import { base } from '$app/paths';
+  import { initializeUser } from "../lib/db_scripts/initializeUser";
 
   let email = "";
   let password = "";
@@ -26,7 +27,7 @@
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);
-      goto(`${base}/home`)
+      await initializeUser(user.uid, "VIEWER", user.email);
     } catch (e) {
       error = e.message;
     }
@@ -77,7 +78,11 @@
     <button
       type="button"
       class="btn google"
-      on:click={async () => await signInWith(googleProvider)}
+      on:click={async () => {
+        await signInWith(googleProvider).then(() => {
+          goto(`${base}/home`);
+        });
+        }}
     >
       <svg
         version="1.1"

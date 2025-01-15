@@ -2,14 +2,21 @@
   import { auth } from "../lib/firebase.config";
   import { createUserWithEmailAndPassword } from "firebase/auth";
   import { sign_up } from "../stores/authStore";
-  import { assignRole } from "../lib/db_scripts/assign_role";
+  import { initializeUser } from "../lib/db_scripts/initializeUser";
   import { goto } from "$app/navigation";
+  import { getBiblioteche } from "../lib/db_scripts/db_functions";
+  import { onMount } from "svelte";
 
   let email = "";
   let password = "";
   let confirmPassword = "";
   let error = "";
   let passwordVisible = false;
+  
+  onMount(async () => {
+    const biblioteche = await getBiblioteche();
+    console.log(biblioteche);
+  });
 
   const register = async (event) => {
     event.preventDefault();
@@ -33,7 +40,7 @@
         password,
       );
       const newUser = userCredential.user;
-      assignRole(newUser.uid, "VIEWER", newUser.email);
+      await initializeUser(newUser.uid, "VIEWER", newUser.email);
       $sign_up = false;
       goto("./biblioteca");
     } catch (e) {
