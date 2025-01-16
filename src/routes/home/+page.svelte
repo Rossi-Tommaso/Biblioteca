@@ -97,7 +97,7 @@
           <span class="icon"><Plus /></span>
           <span class="text">Aggiungi Libro</span>
         </a>
-        <a href="/impostazioni" class="action-card">
+        <a href="{base}/settings" class="action-card">
           <span class="icon"><Settings /></span>
           <span class="text">Impostazioni</span>
         </a>

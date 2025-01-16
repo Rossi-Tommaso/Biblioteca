@@ -1,6 +1,7 @@
 <script>
     import { updateDb } from "../lib/db_scripts/db_functions";
     import SimpleLoader from "./simpleLoader.svelte";
+    import { biblioteca } from "../stores/libStore"
 
     export let hidden = true;
     export let length;
@@ -16,33 +17,40 @@
         read: false,
         loaned: false,
     };
-
+    
+    let editOrAdd = !book.title ? "Aggiungi" : "Modifica";
     let loading = false;
 
     async function saveChanges() {
         loading = true;
         length = book.id ?? length;
-        await updateDb(`protectedData/books/${length}`, { ...book, id: length })
-            .then(() => {
-                loading = false;
-                hidden = true;
+        console.log($biblioteca);
+        if ($biblioteca) {
+            await updateDb(`protectedData/${$biblioteca}/${length}`, {
+                ...book,
+                id: length,
             })
-            .then(() => window.location.reload())
-            .catch(() => {
-                loading = false;
-                book = {
-                    title: "",
-                    authorName: "",
-                    authorSurname: "",
-                    editor: "",
-                    year: "",
-                    place: "",
-                    genre: "",
-                    comments: "",
-                    read: false,
-                    loaned: false,
-                };
-            });
+                .then(() => {
+                    loading = false;
+                    hidden = true;
+                })
+                .then(() => window.location.reload())
+                .catch(() => {
+                    loading = false;
+                    book = {
+                        title: "",
+                        authorName: "",
+                        authorSurname: "",
+                        editor: "",
+                        year: "",
+                        place: "",
+                        genre: "",
+                        comments: "",
+                        read: false,
+                        loaned: false,
+                    };
+                });
+        }
     }
 
     function discardChanges() {
@@ -64,15 +72,20 @@
 
 <div class={hidden ? "hidden" : "overlay"}>
     <div class="pop-up">
-        {#if loading}
+        {#if loading || !$biblioteca}
             <div class="loader">
                 <SimpleLoader />
+                <div class="buttons">
+                    <button class="discard" on:click={discardChanges}
+                        >Annulla</button
+                    >
             </div>
+        </div>
         {:else}
-            <h2>Modifica libro</h2>
+            <h2>{editOrAdd} libro</h2>
             <label>
                 Titolo:
-                <input type="text" bind:value={book.title} />
+                <input type="text" bind:value={book.title} required />
             </label>
             <label>
                 Autore:
@@ -115,14 +128,14 @@
                     placeholder="Incolla il link del immagine di copertina"
                 />
             </label>
-            <label>
+            <div class="check">
                 Letto:
                 <input type="checkbox" bind:checked={book.read} />
-            </label>
-            <label>
+            </div>
+            <div class="check">
                 Prestito:
                 <input type="checkbox" bind:checked={book.loaned} />
-            </label>
+            </div>
             <div class="buttons">
                 <button class="discard" on:click={discardChanges}
                     >Annulla</button
@@ -206,5 +219,12 @@
         width: 100%;
         display: flex;
         justify-content: center;
+    }
+
+    .check {
+        margin-bottom: 2%;
+        display: grid;
+        column-gap: 60%;
+        grid-template-columns: repeat(2, 1fr);
     }
 </style>

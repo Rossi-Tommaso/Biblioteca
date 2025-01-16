@@ -9,17 +9,17 @@
     let profilePhoto;
     let loading = true;
 
-    $: profilePhoto = $user?.photoURL ?? "profile_placeholder.png";
+    $: profilePhoto = $user?.photoURL ?? `${base}/profile_placeholder.png`;
       
     $: hideHeader = $page?.route?.id === `${base}/`;
 
     $: {
       if (!$user && $page?.route?.id === `${base}/`){
         loading = false;
-        console.log($user)
+        console.log('CASE 1:', $user)
       } else if (!$user){
         loading = true;
-        console.log($user)
+        console.log('CASE 2:', $user)
       } else {
         loading = false;
       }

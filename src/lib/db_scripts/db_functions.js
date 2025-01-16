@@ -5,6 +5,7 @@ let fetchDb = async (path) => {
     try {
         const dbRef = ref(db, path);
         const snapshot = await get(dbRef);
+        // console.log('SNAP:', snapshot.val())
         return snapshot.exists() ? snapshot.val() : null;
     } catch (e) {
         console.error('Errore while fetching data:', e);
@@ -44,11 +45,15 @@ const isAdmin = async (uid) => {
     return role === 'ADMIN';
 }
 
-const getBiblioteche = async (uid) => {
+const getBiblioteche = async () => {
     const path = `protectedData/`;
-    console.log(await fetchDb(path));
-    return
-}
+    let biblioteche = await fetchDb(path);
+    if (!biblioteche || typeof biblioteche !== "object") {
+        console.error("Dati non validi:", biblioteche);
+        return [];
+    }
+    return Object.keys(biblioteche);
+};
 
 export { fetchDb, writeDb, updateDb, deleteOnDb, isAdmin, getBiblioteche };
 

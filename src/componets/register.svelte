@@ -6,15 +6,18 @@
   import { goto } from "$app/navigation";
   import { getBiblioteche } from "../lib/db_scripts/db_functions";
   import { onMount } from "svelte";
+  import { Eye, EyeOff } from "lucide-svelte";
 
   let email = "";
   let password = "";
   let confirmPassword = "";
   let error = "";
   let passwordVisible = false;
-  
+  let biblioteche = [];
+  let myLib = null;
+
   onMount(async () => {
-    const biblioteche = await getBiblioteche();
+    biblioteche = await getBiblioteche();
     console.log(biblioteche);
   });
 
@@ -40,7 +43,7 @@
         password,
       );
       const newUser = userCredential.user;
-      await initializeUser(newUser.uid, "VIEWER", newUser.email);
+      await initializeUser(newUser.uid, "VIEWER", newUser.email, myLib);
       $sign_up = false;
       goto("./biblioteca");
     } catch (e) {
@@ -55,6 +58,8 @@
   const togglePasswordVisibility = () => {
     passwordVisible = !passwordVisible;
   };
+
+  $: console.log(myLib);
 </script>
 
 <div>
@@ -68,6 +73,7 @@
         class="input"
         placeholder="Enter your Email"
         bind:value={email}
+        required
       />
     </div>
 
@@ -96,7 +102,11 @@
         tabindex="-1"
         aria-label="Toggle password visibility"
       >
-        {passwordVisible ? "🔓" : "🔒"}
+        {#if passwordVisible}
+          <Eye />
+        {:else}
+          <EyeOff />
+        {/if}
       </button>
     </div>
 
@@ -119,6 +129,17 @@
         style="display: {passwordVisible ? 'block' : 'none'}"
       />
     </div>
+
+    <div class="flex-column">
+      <label for="Library">Scegli Biblioteca {"(opzionale)"}</label>
+    </div>
+
+    <select name="Library" class="input select-inp" bind:value={myLib}>
+      <option value={null}>Crea nuova biblioteca</option>
+      {#each biblioteche as biblioteca}
+        <option value={biblioteca}>{biblioteca}</option>
+      {/each}
+    </select>
 
     <button type="submit" class="button-submit">Sign Up</button>
     <p class="p">
@@ -283,5 +304,63 @@
 
   .btn:hover {
     border: 1px solid #2d79f3;
+  }
+
+  select.input {
+    appearance: none;
+    background-color: white;
+    border: 1.5px solid #ecedec;
+    border-radius: 10px;
+    height: 50px;
+    width: 100%;
+    padding: 0 10px;
+    font-size: 15px;
+    color: #151717;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease-in-out,
+      box-shadow 0.2s ease-in-out;
+  }
+
+  /* Focus e interazione */
+  select.input:focus {
+    outline: none;
+    border-color: #2d79f3;
+    box-shadow: 0 0 4px rgba(45, 121, 243, 0.3);
+  }
+
+  /* Per aggiungere un'icona di dropdown */
+  select.input::-ms-expand {
+    display: none; /* Nasconde la freccia su Internet Explorer */
+  }
+
+  select.input::after {
+    content: "▼"; /* Aggiunge una freccia */
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #151717;
+    pointer-events: none;
+  }
+
+  /* Hover */
+  select.input:hover {
+    border-color: #2d79f3;
+  }
+
+  /* Stile per le opzioni */
+  select.input option {
+    font-size: 14px;
+    color: #151717;
+    background-color: white;
+    padding: 5px;
+  }
+
+  .select-inp {
+    transform: translateX(-2.25%);
   }
 </style>
