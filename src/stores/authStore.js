@@ -1,5 +1,6 @@
 import { writable } from "svelte/store";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { base } from "$app/paths";
 import { auth } from "../lib/firebase.config";
 import { goto } from "$app/navigation"
 
