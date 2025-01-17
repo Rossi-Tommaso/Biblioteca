@@ -17,8 +17,8 @@
     userLib = await fetchDb(`users/${$user.uid}/biblioteca`).then(async (lib) => {
       console.log('userLib:', lib);
       $biblioteca = lib;
-      await getBooks(lib);
-    })
+      getBooks(lib);
+    });
   });
 
   let popup = true;

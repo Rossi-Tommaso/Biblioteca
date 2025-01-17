@@ -26,7 +26,7 @@ onAuthStateChanged(auth, (firebaseUser) => {
       photoURL: firebaseUser.photoURL,
     };
 
-    console.log("USER STORE OK");
+    console.log("USER STORE OK", userData);
     user.set(userData); // Usa il metodo set per aggiornare lo store
   } else {
     console.log("USER STORE NULL");
