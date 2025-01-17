@@ -14,7 +14,7 @@
     $: hideHeader = $page?.route?.id === `${base}/`;
 
     $: {
-      console.log('base:', base)
+      console.log('base:', base, $page?.route?.id)
       if (!$user && $page?.route?.id === `${base}/` || $page?.route?.id === `/Biblioteca/`){
         loading = false;
         console.log('CASE 1:', $user)
