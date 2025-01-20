@@ -1,12 +1,11 @@
 <script>
   import SimpleLoader from "../componets/simpleLoader.svelte";
-  import { user } from "../stores/authStore";
   import Hamburger from "../componets/hamburger.svelte";
   import { page } from "$app/stores";
   import { base } from "$app/paths";
   import { logOut } from "../stores/authStore";
-  import { goto } from '$app/navigation'
-  import { biblioteca } from "../stores/libStore";
+  import { goto } from "$app/navigation";
+  import { user, user_role } from "../stores/authStore";
 
   let profilePhoto;
   let loading = true;
@@ -37,7 +36,12 @@
         <h1>La Mia Biblioteca</h1>
       </div>
       <div class="header-right">
-        <img class="profile-img" src={profilePhoto} alt="profile-placeholder" on:click={() => goto('/settings')}/>
+        <img
+          class="profile-img"
+          src={profilePhoto}
+          alt="profile-placeholder"
+          on:click={() => goto("/settings")}
+        />
       </div>
     </div>
   </header>
@@ -61,6 +65,18 @@
   :global(*) {
     margin: 0;
     padding: 0;
+    border: 0;
+  }
+
+  :global(body) {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+  }
+
+  :global(body::-webkit-scrollbar) {
+    width: 0;
   }
 
   :global(.center-VO) {

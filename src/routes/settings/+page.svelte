@@ -83,12 +83,6 @@
       object-fit: cover;
     }
   
-    .default-avatar {
-      width: 100%;
-      height: 100%;
-      color: #6a11cb;
-    }
-  
     .user-info h2 {
       font-size: 1.8rem;
       margin: 0;

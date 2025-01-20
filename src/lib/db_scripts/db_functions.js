@@ -39,10 +39,18 @@ const deleteOnDb = async (path) => {
     }
 }
 
-const isAdmin = async (uid) => {
+const getUserRole = async (uid) => {
     const path = `users/${uid}/role`;
     const role = await fetchDb(path);
-    return role === 'ADMIN';
+
+    console.log('user role:', role)
+    
+    if (role === 'ADMIN') 
+        return 2;
+    else if (role === 'EDITOR') 
+        return 1;
+    else
+        return 0;
 }
 
 const getBiblioteche = async () => {
@@ -55,5 +63,5 @@ const getBiblioteche = async () => {
     return Object.keys(biblioteche);
 };
 
-export { fetchDb, writeDb, updateDb, deleteOnDb, isAdmin, getBiblioteche };
+export { fetchDb, writeDb, updateDb, deleteOnDb, getUserRole, getBiblioteche };
 

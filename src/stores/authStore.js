@@ -6,6 +6,7 @@ import { goto } from "$app/navigation"
 
 export let user = writable(null);
 export let sign_up = writable(false);
+export let user_role = writable(0);
 
 export const logOut = async () => {
   try {

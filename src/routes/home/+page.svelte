@@ -2,42 +2,63 @@
   import SimpleLoader from "../../componets/simpleLoader.svelte";
   import SideBar from "../../componets/sideBar.svelte";
   import { sidebarVisible } from "../../stores/utilsStore";
-  import { user } from "../../stores/authStore";
+  import { user, user_role } from "../../stores/authStore";
   import { fetchDb } from "../../lib/db_scripts/db_functions";
   import { onMount } from "svelte";
   import { base } from "$app/paths";
+  import {
+    getBiblioteche,
+    getUserRole,
+  } from "../../lib/db_scripts/db_functions";
   import { Settings, Plus, Library, ArrowRightLeft } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
-  import { isAdmin } from "../../lib/db_scripts/db_functions";
-  //import { getPhotoFromSessionStorage } from "../../stores/authStore";
-
   let recentBooks = [];
   let loading = true;
   let userRole;
-  let userLib = '';
   let stats = {
     totalBooks: 0,
     booksRead: 0,
     unread: 0,
   };
-
+  let changeLib = false;
+  let createLib = false;
+  let biblioteche = [];
+  let load = false;
+  let myLib;
   onMount(async () => {
-    userRole = await isAdmin($user.uid);
-    userLib = await fetchDb(`users/${$user.uid}/biblioteca`).then(
-      async (lib) => {
-        console.log("userLib:", lib);
-        $biblioteca = lib;
-        await fetchDb("protectedData/books").then((data) => {
-          console.log("DATAfrom db:", data);
-          recentBooks = data.slice(0, 3);
-          stats.totalBooks = data.length;
-          stats.booksRead = data.filter((book) => book.read);
-          stats.unread = data.filter((book) => !book.read).length;
-          loading = false;
-        });
-      },
+    user_role.set(
+      await getUserRole($user.uid).then((data) => (userRole = data)),
     );
+    await fetchDb(`users/${$user.uid}/biblioteca`).then(async (lib) => {
+      $biblioteca = lib;
+      console.log(lib);
+      await fetchDb(`protectedData/${lib}`).then((data) => {
+        console.log("DATAfrom db:", data);
+        recentBooks = data.slice(0, 3);
+        stats.totalBooks = data.length;
+        stats.booksRead = data.filter((book) => book.read).length;
+        stats.unread = data.filter((book) => !book.read).length;
+        loading = false;
+      });
+    });
+
+    console.log($user.uid);
+    console.log("role:", userRole);
+    console.log("Lib:", $biblioteca);
   });
+
+  const getBooks = async (lib) => {
+    await fetchDb(`protectedData/${lib}`).then((data) => {
+      console.log("DATAfrom db:", data);
+      recentBooks = data.slice(0, 3);
+      stats.totalBooks = data.length;
+      stats.booksRead = data.filter((book) => book.read).length;
+      stats.unread = data.filter((book) => !book.read).length;
+      loading = false;
+    });
+  };
+
+  $: console.log($biblioteca);
 
   const getCurrentTime = () => {
     const hour = new Date().getHours();
@@ -45,6 +66,18 @@
     if (hour < 18) return "Buon pomeriggio";
     return "Buonasera";
   };
+
+  const toggleChangeLib = () => (changeLib = !changeLib);
+
+  const handleLibraryChange = async () => {
+    load = true;
+    biblioteche = await getBiblioteche();
+    await fetchDb(`protectedData/${$biblioteca}`);
+    load = false;
+    toggleChangeLib();
+  };
+
+  const createNewLibrary = () => {};
 </script>
 
 <div class="content">
@@ -52,8 +85,7 @@
     <h2>{getCurrentTime()}, {$user?.displayName || "Lettore"}!</h2>
     <p>Benvenuto nella tua biblioteca personale</p>
   </div>
-
-  {#if $biblioteca}
+  {#if $biblioteca || userRole === 2}
     <div class="stats-grid">
       <div class="stat-card">
         <h3>Libri Totali</h3>
@@ -61,14 +93,13 @@
       </div>
       <div class="stat-card">
         <h3>Libri Letti</h3>
-        <p class="stat-number">{stats.booksRead.length}</p>
+        <p class="stat-number">{stats.booksRead}</p>
       </div>
       <div class="stat-card">
         <h3>Non letti</h3>
         <p class="stat-number">{stats.unread}</p>
       </div>
     </div>
-
     <div class="recent-books-section">
       <h2>Ultimi Libri Aggiunti</h2>
       <div class="recent-books-grid">
@@ -95,7 +126,6 @@
         {/if}
       </div>
     </div>
-
     <div class="quick-actions">
       <h2>Azioni Rapide</h2>
       <div class="actions-grid">
@@ -107,52 +137,74 @@
           <span class="icon"><Settings /></span>
           <span class="text">Impostazioni</span>
         </a>
-        {#if userRole}
-          <div class="action-card">
-            <span class="icon"><ArrowRightLeft /></span>
-            <span class="text">Cambia Biblioteca</span>
-          </div>
-          <div class="action-card">
+        {#if userRole === 2}
+          <button
+            class="action-card {changeLib ? 'select-active' : ''}"
+            on:click={handleLibraryChange}
+          >
+            {#if !changeLib}
+              <span class="icon"><ArrowRightLeft /></span>
+              <span class="text">Cambia Biblioteca</span>
+            {:else}
+              <select
+                name="Library"
+                bind:value={$biblioteca}
+                class="library-select"
+                on:change={getBooks($biblioteca)}
+              >
+                {#each biblioteche as biblioteca}
+                  <option value={biblioteca}>{biblioteca}</option>
+                {/each}
+              </select>
+            {/if}
+          </button>
+          <button class="action-card" on:click={createNewLibrary}>
             <span class="icon"><Plus /></span>
             <span class="text">Crea Nuova biblioteca</span>
-          </div>
+          </button>
         {/if}
       </div>
     </div>
-
     {#if $sidebarVisible}
       <SideBar />
     {/if}
   {:else}
-  <div class="unauthorized-container">
-    <div class="unauthorized-content">
-      <div class="icon-container">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon-unauthorized" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="15" y1="9" x2="9" y2="15"></line>
-          <line x1="9" y1="9" x2="15" y2="15"></line>
-        </svg>
+    <div class="unauthorized-container">
+      <div class="unauthorized-content">
+        <div class="icon-container">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon-unauthorized"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <h3>Accesso non autorizzato</h3>
+        <p>
+          Non hai accesso a questa biblioteca. Per favore, contatta
+          l'amministratore per richiedere la creazione di una nuova biblioteca {"("}nella
+          mail <b>specifica il nome della biblioteca</b> che vuoi creare{")"}
+        </p>
+        <a
+          href="mailto:adm.biblioteca.6a8e6.6809336095@gmail.com"
+          class="contact-button">Contatta l'Amministratore</a
+        >
       </div>
-      <h3>Accesso non autorizzato</h3>
-      <p>
-        Non hai accesso a questa biblioteca. Per favore, contatta l'amministratore per richiedere la creazione di una nuova biblioteca {'('}nella mail <b>specifica il nome della biblioteca</b> che vuoi creare{')'}
-      </p>
-      <a href="mailto:adm.biblioteca.6a8e6.6809336095@gmail.com" class="contact-button">Contatta l'Amministratore</a>
     </div>
-  </div>
   {/if}
 </div>
 
 <style>
   .actions-grid {
     margin-top: 2.5%;
-  }
-
-  :global(body) {
-    margin: 0;
-    font-family: "Poppins", sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
   }
 
   .content {
@@ -270,13 +322,18 @@
     padding: 20px;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      background 0.3s ease;
     text-decoration: none;
     color: #333;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 10px;
+    position: relative;
+    overflow: hidden;
   }
 
   .action-card:hover {
@@ -284,6 +341,22 @@
     background: linear-gradient(45deg, #6a11cb, #ff8a65);
     color: #fff;
     cursor: pointer;
+  }
+
+  .library-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 200px;
+    appearance: none;
+  }
+
+  .library-select:focus {
+    outline: none;
+    border-color: #6a11cb;
+    box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
   }
 
   .icon {
@@ -337,12 +410,13 @@
     text-decoration: none;
     font-size: 1rem;
     font-weight: bold;
-    transition: background 0.3s ease, transform 0.3s ease;
+    transition:
+      background 0.3s ease,
+      transform 0.3s ease;
   }
 
   .contact-button:hover {
     background: linear-gradient(45deg, #ff8a65, #ff4d4d);
     transform: translateY(-2px);
   }
-
 </style>

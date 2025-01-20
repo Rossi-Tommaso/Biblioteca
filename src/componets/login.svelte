@@ -27,7 +27,7 @@
   const signInWith = async (provider) => {
     try {
       await signInWithPopup(auth, provider);
-      await initializeUser(user.uid, "VIEWER", user.email);
+      await initializeUser($user.uid, "VIEWER", $user.email);
     } catch (e) {
       error = e.message;
     }
