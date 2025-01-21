@@ -63,5 +63,10 @@ const getBiblioteche = async () => {
     return Object.keys(biblioteche);
 };
 
-export { fetchDb, writeDb, updateDb, deleteOnDb, getUserRole, getBiblioteche };
+const createNewBiblioteca = async (name) => {
+    const path = `protectedData/${name}`;
+    await updateDb(path, {});
+};
+
+export { fetchDb, writeDb, updateDb, deleteOnDb, getUserRole, getBiblioteche, createNewBiblioteca };
 

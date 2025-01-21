@@ -9,9 +9,11 @@
   import {
     getBiblioteche,
     getUserRole,
+    createNewBiblioteca,
   } from "../../lib/db_scripts/db_functions";
   import { Settings, Plus, Library, ArrowRightLeft } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
+
   let recentBooks = [];
   let loading = true;
   let userRole;
@@ -23,8 +25,10 @@
   let changeLib = false;
   let createLib = false;
   let biblioteche = [];
-  let load = false;
-  let myLib;
+  let load1 = false;
+  let load2 = false;
+  let newLibName = "";
+
   onMount(async () => {
     user_role.set(
       await getUserRole($user.uid).then((data) => (userRole = data)),
@@ -70,14 +74,20 @@
   const toggleChangeLib = () => (changeLib = !changeLib);
 
   const handleLibraryChange = async () => {
-    load = true;
+    load1 = true;
     biblioteche = await getBiblioteche();
     await fetchDb(`protectedData/${$biblioteca}`);
-    load = false;
+    load1 = false;
     toggleChangeLib();
   };
 
-  const createNewLibrary = () => {};
+  const toggleCreateLib = () => (createLib = !createLib);
+
+  const createNewLibrary = () => {
+    load2 = true;
+    toggleCreateLib();
+    load2 = false;
+  };
 </script>
 
 <div class="content">
@@ -138,30 +148,56 @@
           <span class="text">Impostazioni</span>
         </a>
         {#if userRole === 2}
-          <button
-            class="action-card {changeLib ? 'select-active' : ''}"
-            on:click={handleLibraryChange}
-          >
-            {#if !changeLib}
+          {#if !changeLib}
+            <button
+              class="action-card {changeLib ? 'select-active' : ''}"
+              on:click={handleLibraryChange}
+            >
               <span class="icon"><ArrowRightLeft /></span>
               <span class="text">Cambia Biblioteca</span>
-            {:else}
+            </button>
+          {:else}
+            <div class="action-card">
               <select
                 name="Library"
                 bind:value={$biblioteca}
                 class="library-select"
-                on:change={getBooks($biblioteca)}
+                on:change={async () => {
+                  await getBooks($biblioteca);
+                  changeLib = false;
+                }}
               >
                 {#each biblioteche as biblioteca}
                   <option value={biblioteca}>{biblioteca}</option>
                 {/each}
               </select>
-            {/if}
-          </button>
+              <button class="annulla" on:click={toggleChangeLib}>Annulla</button>
+            </div>
+          {/if}
+          {#if !createLib}
           <button class="action-card" on:click={createNewLibrary}>
-            <span class="icon"><Plus /></span>
-            <span class="text">Crea Nuova biblioteca</span>
-          </button>
+              <span class="icon"><Plus /></span>
+              <span class="text">Crea Nuova biblioteca</span>
+            </button>
+            {:else}
+            <div class="action-card">
+              <input
+                type="text"
+                name="library-name"
+                class="library-select"
+                bind:value={newLibName}
+              />
+              <div class="buttons">
+                <button on:click={async () => {
+                  if (!newLibName) return;
+                  await createNewBiblioteca(newLibName);
+                  await getBooks(newLibName);
+                  createLib = false;
+                }}>crea</button>
+                <button class="annulla" on:click={toggleCreateLib}>Annulla</button>
+              </div>
+            </div>
+            {/if}
         {/if}
       </div>
     </div>
@@ -203,10 +239,6 @@
 </div>
 
 <style>
-  .actions-grid {
-    margin-top: 2.5%;
-  }
-
   .content {
     max-width: 1200px;
     margin: 30px auto;
@@ -310,7 +342,14 @@
     margin: 5px 0;
   }
 
+  .quick-actions {
+    margin-top: 2.5%;
+    height: 15dvh;
+  }
+
   .actions-grid {
+    margin-top: 2.5%;
+    height: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
@@ -419,4 +458,80 @@
     background: linear-gradient(45deg, #ff8a65, #ff4d4d);
     transform: translateY(-2px);
   }
+
+  .action-card.select-active,
+.action-card:has(.library-select) {
+  padding: 15px;
+  gap: 8px;
+  min-height: 120px;
+}
+
+.library-select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #ffffff;
+  color: #333;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+}
+
+.library-select:focus {
+  border-color: #6a11cb;
+  box-shadow: 0 0 8px rgba(106, 17, 203, 0.3);
+  outline: none;
+}
+
+/* Buttons within action cards */
+.action-card button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.annulla {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.buttons button:first-of-type {
+  background: linear-gradient(45deg, #6a11cb, #ff8a65);
+  color: white;
+  margin-right: 8px;
+}
+
+.action-card button:hover {
+  transform: translateY(-2px);
+}
+
+.action-card button:first-of-type:hover {
+  background: linear-gradient(45deg, #7b2dd4, #ff9977);
+}
+
+.action-card button:last-of-type:hover {
+  background-color: #e5e5e5;
+}
+
+/* Input field for new library name */
+.action-card input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.action-card input[type="text"]:focus {
+  border-color: #6a11cb;
+  box-shadow: 0 0 8px rgba(106, 17, 203, 0.3);
+  outline: none;
+}
 </style>
