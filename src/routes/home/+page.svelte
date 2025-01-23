@@ -1,7 +1,5 @@
 <script>
   import SimpleLoader from "../../componets/simpleLoader.svelte";
-  import SideBar from "../../componets/sideBar.svelte";
-  import { sidebarVisible } from "../../stores/utilsStore";
   import { user, user_role } from "../../stores/authStore";
   import { fetchDb } from "../../lib/db_scripts/db_functions";
   import { onMount } from "svelte";
@@ -10,6 +8,7 @@
     getBiblioteche,
     getUserRole,
     createNewBiblioteca,
+    updateDb,
   } from "../../lib/db_scripts/db_functions";
   import { Settings, Plus, Library, ArrowRightLeft } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
@@ -163,12 +162,13 @@
                 bind:value={$biblioteca}
                 class="library-select"
                 on:change={async () => {
+                  await updateDb(`users/${$user.uid}/`, {"biblioteca" : `${$biblioteca}`})
                   await getBooks($biblioteca);
                   changeLib = false;
                 }}
               >
                 {#each biblioteche as biblioteca}
-                  <option value={biblioteca}>{biblioteca}</option>
+                  <option value={biblioteca}>{biblioteca.replace('_', ' ')}</option>
                 {/each}
               </select>
               <button class="annulla" on:click={toggleChangeLib}>Annulla</button>
@@ -189,10 +189,18 @@
               />
               <div class="buttons">
                 <button on:click={async () => {
-                  if (!newLibName) return;
-                  await createNewBiblioteca(newLibName);
-                  await getBooks(newLibName);
+                  if (!newLibName) 
+                    return;
+                  console.log('newLibName', newLibName)
+                  try{
+                  await createNewBiblioteca(newLibName.replace(' ', '_'));
+                  await getBooks($biblioteca);
+                } catch (e) {
+                  console.error('Error:', e)
+                }
+                finally {
                   createLib = false;
+                }
                 }}>crea</button>
                 <button class="annulla" on:click={toggleCreateLib}>Annulla</button>
               </div>
@@ -201,9 +209,6 @@
         {/if}
       </div>
     </div>
-    {#if $sidebarVisible}
-      <SideBar />
-    {/if}
   {:else}
     <div class="unauthorized-container">
       <div class="unauthorized-content">
@@ -509,15 +514,6 @@
 .action-card button:hover {
   transform: translateY(-2px);
 }
-
-.action-card button:first-of-type:hover {
-  background: linear-gradient(45deg, #7b2dd4, #ff9977);
-}
-
-.action-card button:last-of-type:hover {
-  background-color: #e5e5e5;
-}
-
 /* Input field for new library name */
 .action-card input[type="text"] {
   width: 100%;

@@ -1,11 +1,14 @@
 <script>
   import SimpleLoader from "../componets/simpleLoader.svelte";
   import Hamburger from "../componets/hamburger.svelte";
+  import SideBar from "../componets/sideBar.svelte";
+  import { sidebarVisible } from "../stores/utilsStore";
   import { page } from "$app/stores";
   import { base } from "$app/paths";
   import { logOut } from "../stores/authStore";
   import { goto } from "$app/navigation";
-  import { user, user_role } from "../stores/authStore";
+  import { user } from "../stores/authStore";
+  import { fade } from "svelte/transition";
 
   let profilePhoto;
   let loading = true;
@@ -59,6 +62,12 @@
       >Esci</button
     >
   </div>
+{/if}
+
+{#if $sidebarVisible}
+<div class="sidebar-transition" transition:fade>
+  <SideBar />
+</div>
 {/if}
 
 <style>
@@ -152,5 +161,9 @@
     display: flex;
     flex-direction: column;
     gap: 1em;
+  }
+  
+  .sidebar-transition {
+    height: 100dvh;
   }
 </style>

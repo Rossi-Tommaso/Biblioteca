@@ -1,9 +1,7 @@
 <script>
-    import { onMount } from "svelte";
     import { user } from "../../stores/authStore";
     import { base } from "$app/paths";
     import { logOut } from "../../stores/authStore";
-    import { Settings, LogOut, UserCircle } from "lucide-svelte";
   </script>
   
   <div class="content">

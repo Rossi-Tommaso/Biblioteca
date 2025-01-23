@@ -1,25 +1,37 @@
 <script>
   import PopUp from "../../componets/popUp.svelte";
-  import SideBar from "../../componets/sideBar.svelte";
-  import { sidebarVisible } from "../../stores/utilsStore";
   import Loader from "../../componets/loader.svelte";
   import { user, user_role } from "../../stores/authStore";
-  import { fetchDb, deleteOnDb } from "../../lib/db_scripts/db_functions";
+  import {
+    fetchDb,
+    deleteOnDb,
+    getUserRole,
+  } from "../../lib/db_scripts/db_functions";
   import { onMount } from "svelte";
-  import { Plus, Search } from "lucide-svelte";
+  import { Plus, Search, BookOpen } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
+  import { writable } from 'svelte/store';
 
-  // import { getPhotoFromSessionStorage } from "../../stores/authStore";
+  const toasts = writable([]);
+
+  function toast(message, type = 'info') {
+    const id = Math.random().toString(36);
+    toasts.update(all => [...all, { id, message, type }]);
+    setTimeout(() => {
+      toasts.update(all => all.filter(t => t.id !== id));
+    }, 3000);
+  }
 
   onMount(async () => {
-    profilePhoto = $user.photoURL ?? "/profile_placeholder.png";
-    userLib = await fetchDb(`users/${$user.uid}/biblioteca`).then(
-      async (lib) => {
-        console.log("userLib:", lib);
-        $biblioteca = lib;
-        getBooks(lib);
-      },
+    user_role.set(
+      await getUserRole($user.uid).then((data) => (userRole = data)),
     );
+    profilePhoto = $user.photoURL ?? "/profile_placeholder.png";
+    await fetchDb(`users/${$user.uid}/biblioteca`).then(async (lib) => {
+      console.log("userLib:", lib);
+      $biblioteca = lib;
+      await getBooks(lib);
+    });
   });
 
   let popup = true;
@@ -30,33 +42,20 @@
   let displayedBooks = [];
   let profilePhoto;
   let userRole;
-  let userLib;
 
   const togglepopup = (book) => {
     popupBook = book;
     popup = !popup;
   };
 
-  const getBooks = (lib) => {
+  const getBooks = async (lib) => {
     loading = true;
-    fetchDb(`protectedData/${lib}`).then((data) => {
+    await fetchDb(`protectedData/${lib}`).then((data) => {
       books = data;
       displayedBooks = data;
       loading = false;
     });
   };
-
-  $: {
-    if (userLib) {
-      fetchDb(`protectedData/$userLib}`).then((data) => {
-        books = data;
-        displayedBooks = data;
-        loading = false;
-      });
-    }
-  }
-
-  $: userRole = $user_role;
 
   const addBook = () => {
     popup = !popup;
@@ -67,26 +66,41 @@
   };
 
   const removeBook = async (book) => {
-    loading = true;
-    console.log($biblioteca, book.id);
-    await deleteOnDb(`protectedData/${$biblioteca}/${book.id}`).then(
-      async () => {
-        loading = false;
-        getBooks($biblioteca);
-      },
-    );
+    try {
+      loading = true;
+      await deleteOnDb(`protectedData/${$biblioteca}/${book.id}`);
+      await getBooks($biblioteca);
+      toast('Book removed successfully', 'success');
+    } catch (error) {
+      toast('Failed to remove book', 'error');
+      console.error(error);
+    } finally {
+      loading = false;
+    }
   };
 
-  $: {
-    if (searchQuery.trim() === "") {
-      displayedBooks = books;
-    } else {
-      displayedBooks = books.filter((book) =>
+  $: userRole = $user_role;
+
+  $: filteredBooks = searchQuery.trim()
+    ? books.filter((book) =>
         book.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
+      )
+    : books;
+
+  $: {
+  if ($biblioteca) {
+    getBooks($biblioteca);
   }
+}
 </script>
+
+{#if $toasts.length}
+  <div class="toast-container">
+    {#each $toasts as toast (toast.id)}
+      <div class="toast {toast.type}">{toast.message}</div>
+    {/each}
+  </div>
+{/if}
 
 {#if userRole}
   <button class="add-book-button" on:click={addBook} aria-label="Add new book">
@@ -104,13 +118,14 @@
   {/if}
 
   <div class="top-actions">
-    <h1 class="page-title">Library:</h1>
-    <h1 class="lib-title">{userLib}</h1>
+    <h1 class="page-title">Biblioteca:</h1>
+    <h1 class="lib-title">{$biblioteca.replace('_', ' ')}</h1>
+    <!-- <button>switch bookshelf</button> to implement -->
     <div class="search-bar">
       <Search size={20} />
       <input
         type="text"
-        placeholder="Search books..."
+        placeholder="Cerca libri..."
         bind:value={searchQuery}
         aria-label="Search books"
       />
@@ -138,13 +153,14 @@
               {#if userRole}
                 <div class="actions">
                   <button class="edit-button" on:click={() => editBook(book)}>
-                    Edit
+                    Modifica
                   </button>
                   <button
                     class="delete-button"
                     on:click={() => removeBook(book)}
+                    aria-label={`Remove ${book.title}`}
                   >
-                    Remove
+                    Rimuovi
                   </button>
                 </div>
               {/if}
@@ -167,10 +183,6 @@
     {/if}
   </div>
 </main>
-
-{#if $sidebarVisible}
-  <SideBar />
-{/if}
 
 <style>
   main.content {
@@ -355,6 +367,7 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    z-index: 100;
   }
 
   .add-book-button:hover {
@@ -381,6 +394,36 @@
     margin-top: 0.5rem;
     font-size: 0.875rem;
   }
+
+  .loader-container {
+    width: 100%;
+    padding-top: 25dvh;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+  .toast {
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    color: white;
+    opacity: 0.9;
+  }
+  .success {
+    background-color: #48bb78;
+  }
+  .error {
+    background-color: #f56565;
+  }
+
 
   @media (max-width: 768px) {
     .page-title {

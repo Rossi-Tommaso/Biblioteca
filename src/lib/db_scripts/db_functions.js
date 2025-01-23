@@ -40,32 +40,45 @@ const deleteOnDb = async (path) => {
 }
 
 const getUserRole = async (uid) => {
-    const path = `users/${uid}/role`;
-    const role = await fetchDb(path);
+    try{
+        const path = `users/${uid}/role`;
+        const role = await fetchDb(path);
 
-    console.log('user role:', role)
-    
-    if (role === 'ADMIN') 
-        return 2;
-    else if (role === 'EDITOR') 
-        return 1;
-    else
-        return 0;
+        console.log('user role:', role);
+        
+        if (role === 'ADMIN') 
+            return 2;
+        else if (role === 'EDITOR') 
+            return 1;
+        else
+            return 0;
+    } catch (e) {
+        console.error('Error while getting user role:', e);
+    }
 }
 
 const getBiblioteche = async () => {
-    const path = `protectedData/`;
-    let biblioteche = await fetchDb(path);
-    if (!biblioteche || typeof biblioteche !== "object") {
-        console.error("Dati non validi:", biblioteche);
-        return [];
-    }
+    try {
+        const path = `protectedData/`;
+        let biblioteche = await fetchDb(path);
+        if (!biblioteche || typeof biblioteche !== "object") {
+            console.error("Dati non validi:", biblioteche);
+            return [];
+        }
     return Object.keys(biblioteche);
+    } catch (e) {
+        console.error('Error while getting all library name:', e);
+    }
 };
 
 const createNewBiblioteca = async (name) => {
-    const path = `protectedData/${name}`;
-    await updateDb(path, {});
+    try {
+        const path = `protectedData/${name}`;
+        await updateDb(path, {'0' : {'title': 'my first book'}});
+    }
+    catch (e) {
+        console.error('Errore while creating new library:', e);
+    }
 };
 
 export { fetchDb, writeDb, updateDb, deleteOnDb, getUserRole, getBiblioteche, createNewBiblioteca };

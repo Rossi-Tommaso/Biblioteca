@@ -1,7 +1,7 @@
 <script>
   import { logOut } from "../stores/authStore";
   import { base } from '$app/paths';
-  import { Home, Book, Bookmark, Settings, LogOut  } from "lucide-svelte";
+  import { Home, Book, Settings, LogOut  } from "lucide-svelte";
 </script>
 
 <div class="layout">
@@ -12,7 +12,7 @@
       <ul class="menu">
         <li><Home /><a href="{base}/home"> Home</a></li>
         <li><Book /><a href="{base}/biblioteca"> I miei libri</a></li>
-        <li><Settings /><a href="#"> Impostazioni</a></li>
+        <li><Settings /><a href="{base}/impostazionio"> Impostazioni</a></li>
         <li><LogOut /><a on:click={async () => await logOut()}> Logout</a></li>
       </ul>
     </div>
@@ -58,14 +58,6 @@
     font-size: 2rem;
     margin: 0;
     margin-left: 25%;
-  }
-
-  .close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
   }
 
   .menu {
