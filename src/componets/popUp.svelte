@@ -5,6 +5,8 @@
 
     export let hidden = true;
     export let length;
+    export let update;
+
     export let book = {
         title: "",
         authorName: "",
@@ -34,7 +36,22 @@
                     loading = false;
                     hidden = true;
                 })
-                .then(() => window.location.reload())
+                .then(() => {
+                    update = !update;
+                    hidden = true;
+                    book = {
+                        title: "",
+                        authorName: "",
+                        authorSurname: "",
+                        editor: "",
+                        year: "",
+                        place: "",
+                        genre: "",
+                        comments: "",
+                        read: false,
+                        loaned: false,
+                    };
+                })
                 .catch(() => {
                     loading = false;
                     book = {
