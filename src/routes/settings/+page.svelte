@@ -2,6 +2,12 @@
     import { user } from "../../stores/authStore";
     import { base } from "$app/paths";
     import { logOut } from "../../stores/authStore";
+    import { sidebarVisible } from "../../stores/utilsStore";
+    import { onMount } from "svelte";
+
+    onMount(() => {
+      sidebarVisible.set(false);
+    }); 
   </script>
   
   <div class="content">

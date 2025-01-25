@@ -12,6 +12,7 @@
   } from "../../lib/db_scripts/db_functions";
   import { Settings, Plus, Library, ArrowRightLeft } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
+  import { sidebarVisible } from "../../stores/utilsStore";
 
   let recentBooks = [];
   let loading = true;
@@ -29,6 +30,7 @@
   let newLibName = "";
 
   onMount(async () => {
+    sidebarVisible.set(false);
     user_role.set(
       await getUserRole($user.uid).then((data) => (userRole = data)),
     );

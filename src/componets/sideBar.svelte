@@ -12,7 +12,7 @@
       <ul class="menu">
         <li><Home /><a href="{base}/home"> Home</a></li>
         <li><Book /><a href="{base}/biblioteca"> I miei libri</a></li>
-        <li><Settings /><a href="{base}/impostazionio"> Impostazioni</a></li>
+        <li><Settings /><a href="{base}/settings"> Impostazioni</a></li>
         <li><LogOut /><a on:click={async () => await logOut()}> Logout</a></li>
       </ul>
     </div>
