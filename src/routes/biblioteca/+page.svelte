@@ -81,7 +81,7 @@
 
   $: userRole = $user_role;
 
-  $: filteredBooks = searchQuery.trim()
+  $: displayedBooks = searchQuery.trim()
     ? books.filter((book) =>
         book.title.toLowerCase().includes(searchQuery.toLowerCase()),
       )
