@@ -1,7 +1,8 @@
 <script>
-    import { updateDb } from "../lib/db_scripts/db_functions";
     import SimpleLoader from "./simpleLoader.svelte";
-    import { biblioteca } from "../stores/libStore"
+    import { updateDb } from "../lib/db_scripts/db_functions";
+    import { biblioteca } from "../stores/libStore";
+    import { toast } from "../stores/utilsStore";
 
     export let hidden = true;
     export let length;
@@ -33,6 +34,7 @@
                 id: length,
             })
                 .then(() => {
+                    toast(`Libro ${editOrAdd === 'Aggiungi' ? 'aggiunto' : 'modificato'} con successo.` , "success");
                     loading = false;
                     hidden = true;
                 })
@@ -53,6 +55,7 @@
                     };
                 })
                 .catch(() => {
+                    toast(`ERRORE: Il libro non è stato ${editOrAdd === 'Aggiungi' ? 'aggiunto' : 'modificato'} con successo.` , "fail");
                     loading = false;
                     book = {
                         title: "",

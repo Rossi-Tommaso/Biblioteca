@@ -11,17 +11,8 @@
   import { Plus, Search, BookOpen } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
   import { sidebarVisible } from "../../stores/utilsStore";
-  import { writable } from 'svelte/store';
+  import { toast } from "../../stores/utilsStore";
 
-  const toasts = writable([]);
-
-  function toast(message, type = 'info') {
-    const id = Math.random().toString(36);
-    toasts.update(all => [...all, { id, message, type }]);
-    setTimeout(() => {
-      toasts.update(all => all.filter(t => t.id !== id));
-    }, 3000);
-  }
 
   onMount(async () => {
     sidebarVisible.set(false);
@@ -101,14 +92,6 @@
   }
 }
 </script>
-
-{#if $toasts.length}
-  <div class="toast-container">
-    {#each $toasts as toast (toast.id)}
-      <div class="toast {toast.type}">{toast.message}</div>
-    {/each}
-  </div>
-{/if}
 
 {#if userRole}
   <button class="add-book-button" on:click={addBook} aria-label="Add new book">
@@ -411,26 +394,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .toast-container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1000;
-  }
-  .toast {
-    padding: 0.75rem 1.5rem;
-    margin-bottom: 0.5rem;
-    border-radius: 4px;
-    color: white;
-    opacity: 0.9;
-  }
-  .success {
-    background-color: #48bb78;
-  }
-  .error {
-    background-color: #f56565;
   }
 
 

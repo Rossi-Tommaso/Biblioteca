@@ -9,6 +9,7 @@
   import { goto } from "$app/navigation";
   import { user } from "../stores/authStore";
   import { fade } from "svelte/transition";
+  import { toasts } from "../stores/utilsStore";
 
   let profilePhoto;
   let loading = true;
@@ -29,6 +30,14 @@
     }
   }
 </script>
+
+{#if $toasts.length}
+  <div class="toast-container">
+    {#each $toasts as toast (toast.id)}
+      <div class="toast {toast.type}">{toast.message}</div>
+    {/each}
+  </div>
+{/if}
 
 {#if !hideHeader}
   <header>
@@ -96,6 +105,27 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+  }
+
+  .toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .toast {
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    color: white;
+    opacity: 0.9;
+  }
+  .success {
+    background-color: #48bb78;
+  }
+  .error {
+    background-color: #f56565;
   }
 
   header {
