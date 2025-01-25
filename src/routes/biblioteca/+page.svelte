@@ -10,6 +10,7 @@
   import { onMount } from "svelte";
   import { Plus, Search, BookOpen } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
+  import { sidebarVisible } from "../../stores/utilsStore";
   import { writable } from 'svelte/store';
 
   const toasts = writable([]);
@@ -23,6 +24,7 @@
   }
 
   onMount(async () => {
+    sidebarVisible.set(false);
     user_role.set(
       await getUserRole($user.uid).then((data) => (userRole = data)),
     );
