@@ -34,6 +34,7 @@
     });
   });
 
+  let booksToUpdade = false; 
   let popup = true;
   let popupBook;
   let loading = true;
@@ -91,6 +92,11 @@
   if ($biblioteca) {
     getBooks($biblioteca);
   }
+
+  if (booksToUpdade) {
+    getBooks($biblioteca);
+    booksToUpdade = false;
+  }
 }
 </script>
 
@@ -114,6 +120,7 @@
       bind:hidden={popup}
       bind:book={popupBook}
       bind:length={books.length}
+      bind:update={booksToUpdade}
     />
   {/if}
 
