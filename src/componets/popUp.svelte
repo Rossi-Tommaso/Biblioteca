@@ -8,29 +8,37 @@
     export let length;
     export let update;
     export let scaffali;
-    export let book = {
-        title: "",
-        authorName: "",
-        authorSurname: "",
-        editor: "",
-        place: "",
-        year: "",
-        genre: "",
-        comments: "",
-        bookshelf: "",
-        read: false,
-        loaned: false,
-    };
-    
-    let editOrAdd = !book.title ? "Aggiungi" : "Modifica";
+    export let book = createEmptyBook();
+
+    let editOrAdd = book.title ? "Modifica" : "Aggiungi";
     let loading = false;
     let newBookshelf = "";
     let showNewBookshelfInput = false;
 
+    function createEmptyBook() {
+        return {
+            title: "",
+            authorName: "",
+            authorSurname: "",
+            editor: "",
+            place: "",
+            year: "",
+            genre: "",
+            comments: "",
+            bookshelf: "",
+            read: false,
+            loaned: false,
+        };
+    }
+
+    function resetBook() {
+        book = createEmptyBook();
+    }
+
     const addNewBookshelf = () => {
-        if (newBookshelf.trim()) {
-            scaffali = new Set([...scaffali, newBookshelf.trim()]);
-            book.bookshelf = newBookshelf.trim();
+        const trimmed = newBookshelf.trim();
+        if (trimmed) {
+            scaffali = new Set([...scaffali, trimmed]);
             newBookshelf = "";
             showNewBookshelfInput = false;
             toast("Nuovo scaffale aggiunto", "success");
@@ -39,191 +47,126 @@
 
     async function saveChanges() {
         loading = true;
-        length = book.id ?? length;
-        console.log($biblioteca);
-        if ($biblioteca) {
-            await updateDb(`protectedData/${$biblioteca}/${length}`, {
-                ...book,
-                id: length,
-            })
-                .then(() => {
-                    toast(`Libro ${editOrAdd === 'Aggiungi' ? 'aggiunto' : 'modificato'} con successo.` , "success");
-                    loading = false;
-                    hidden = true;
-                })
-                .then(() => {
-                    update = !update;
-                    hidden = true;
-                    book = {
-                        title: "",
-                        authorName: "",
-                        authorSurname: "",
-                        editor: "",
-                        year: "",
-                        place: "",
-                        genre: "",
-                        comments: "",
-                        bookshelf: "",
-                        read: false,
-                        loaned: false,
-                    };
-                })
-                .catch(() => {
-                    toast(`ERRORE: Il libro non è stato ${editOrAdd === 'Aggiungi' ? 'aggiunto' : 'modificato'} con successo.` , "fail");
-                    loading = false;
-                    book = {
-                        title: "",
-                        authorName: "",
-                        authorSurname: "",
-                        editor: "",
-                        year: "",
-                        place: "",
-                        genre: "",
-                        comments: "",
-                        bookshelf: "",
-                        read: false,
-                        loaned: false,
-                    };
-                });
+        try {
+            const id = book.id ?? length;
+            await updateDb(`protectedData/${$biblioteca}/${id}`, { ...book, id });
+
+            toast(`Libro ${editOrAdd === "Aggiungi" ? "aggiunto" : "modificato"} con successo.`, "success");
+
+            update = !update;
+            hidden = true;
+            resetBook();
+        } catch (error) {
+            toast(`ERRORE: Il libro non è stato ${editOrAdd === "Aggiungi" ? "aggiunto" : "modificato"} con successo.`, "fail");
+        } finally {
+            loading = false;
         }
     }
 
     function discardChanges() {
         hidden = true;
-        book = {
-            title: "",
-            authorName: "",
-            authorSurname: "",
-            editor: "",
-            year: "",
-            place: "",
-            genre: "",
-            bookshelf: "",
-            comments: "",
-            read: false,
-            loaned: false,
-        };
+        resetBook();
     }
 </script>
 
-    <div class={hidden ? "hidden" : "overlay"}>
-        <div class="pop-up">
-            {#if loading || !$biblioteca}
-                <div class="loader">
-                    <SimpleLoader />
-                    <div class="buttons">
-                        <button class="discard" on:click={discardChanges}>Annulla</button>
+<div class={hidden ? "hidden" : "overlay"}>
+    <div class="pop-up">
+        {#if loading || !$biblioteca}
+            <div class="loader">
+                <SimpleLoader />
+                <div class="buttons">
+                    <button class="discard" on:click={discardChanges}>Annulla</button>
+                </div>
+            </div>
+        {:else}
+            <h2 class="form-title">{editOrAdd} libro</h2>
+            <div class="form-grid">
+                <label class="full-width">
+                    <span class="label-text">Titolo:</span>
+                    <input type="text" bind:value={book.title} required />
+                </label>
+
+                <div class="author-group full-width">
+                    <span class="label-text">Autore:</span>
+                    <div class="author-inputs">
+                        <input type="text" placeholder="Nome" bind:value={book.authorName} />
+                        <input type="text" placeholder="Cognome" bind:value={book.authorSurname} />
                     </div>
                 </div>
-            {:else}
-                <h2 class="form-title">{editOrAdd} libro</h2>
-                <div class="form-grid">
-                    <label class="full-width">
-                        <span class="label-text">Titolo:</span>
-                        <input type="text" bind:value={book.title} required />
+
+                <label>
+                    <span class="label-text">Editore:</span>
+                    <input type="text" bind:value={book.editor} />
+                </label>
+
+                <label>
+                    <span class="label-text">Luogo:</span>
+                    <input type="text" bind:value={book.place} />
+                </label>
+
+                <label>
+                    <span class="label-text">Anno:</span>
+                    <input type="number" bind:value={book.year} />
+                </label>
+
+                <label>
+                    <span class="label-text">Genere:</span>
+                    <input type="text" bind:value={book.genre} />
+                </label>
+
+                <div class="bookshelf-section full-width">
+                    <label>
+                        <span class="label-text">Scaffale:</span>
+                        <select bind:value={book.bookshelf}>
+                            <option value="">Seleziona uno scaffale</option>
+                            {#each [...scaffali] as shelf}
+                                <option value={shelf}>{shelf}</option>
+                            {/each}
+                        </select>
                     </label>
-                    
-                    <div class="author-group full-width">
-                        <span class="label-text">Autore:</span>
-                        <div class="author-inputs">
-                            <input
-                                type="text"
-                                placeholder="Nome"
-                                bind:value={book.authorName}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Cognome"
-                                bind:value={book.authorSurname}
-                            />
+
+                    {#if showNewBookshelfInput}
+                        <div class="new-bookshelf-input">
+                            <input type="text" bind:value={newBookshelf} placeholder="Nome nuovo scaffale" />
+                            <button class="add-shelf" on:click={addNewBookshelf}>Aggiungi</button>
                         </div>
-                    </div>
-    
-                    <label>
-                        <span class="label-text">Editore:</span>
-                        <input type="text" bind:value={book.editor} />
-                    </label>
-    
-                    <label>
-                        <span class="label-text">Luogo:</span>
-                        <input type="text" bind:value={book.place} />
-                    </label>
-    
-                    <label>
-                        <span class="label-text">Anno:</span>
-                        <input type="number" bind:value={book.year} />
-                    </label>
-    
-                    <label>
-                        <span class="label-text">Genere:</span>
-                        <input type="text" bind:value={book.genre} />
-                    </label>
-                    
-                    <div class="bookshelf-section full-width">
-                        <label>
-                            <span class="label-text">Scaffale:</span>
-                            <select bind:value={book.bookshelf}>
-                                <option value="">Seleziona uno scaffale</option>
-                                {#each [...scaffali] as shelf}
-                                    <option value={shelf}>{shelf}</option>
-                                {/each}
-                            </select>
-                        </label>
-                        
-                        {#if showNewBookshelfInput}
-                            <div class="new-bookshelf-input">
-                                <input
-                                    type="text"
-                                    bind:value={newBookshelf}
-                                    placeholder="Nome nuovo scaffale"
-                                />
-                                <button class="add-shelf" on:click={addNewBookshelf}>
-                                    Aggiungi
-                                </button>
-                            </div>
-                        {:else}
-                            <button class="new-shelf" on:click={() => showNewBookshelfInput = true}>
-                                Nuovo scaffale
-                            </button>
-                        {/if}
-                    </div>
-    
-                    <label class="full-width">
-                        <span class="label-text">Commenti:</span>
-                        <textarea bind:value={book.comments}></textarea>
-                    </label>
-    
-                    <label class="full-width">
-                        <span class="label-text">Copertina:</span>
-                        <input
-                            type="text"
-                            bind:value={book.cover}
-                            placeholder="Incolla il link dell'immagine di copertina"
-                        />
-                    </label>
-    
-                    <div class="toggles-group full-width">
-                        <label class="toggle">
-                            <span class="label-text">Letto:</span>
-                            <input type="checkbox" bind:checked={book.read} />
-                            <span class="checkmark"></span>
-                        </label>
-    
-                        <label class="toggle">
-                            <span class="label-text">Prestito:</span>
-                            <input type="checkbox" bind:checked={book.loaned} />
-                            <span class="checkmark"></span>
-                        </label>
-                    </div>
-    
-                    <div class="buttons full-width">
-                        <button class="discard" on:click={discardChanges}>Annulla</button>
-                        <button class="save" on:click={saveChanges}>Salva</button>
-                    </div>
+                    {:else}
+                        <button class="new-shelf" on:click={() => showNewBookshelfInput = true}>Nuovo scaffale</button>
+                    {/if}
                 </div>
-            {/if}
-        </div>
+
+                <label class="full-width">
+                    <span class="label-text">Commenti:</span>
+                    <textarea bind:value={book.comments}></textarea>
+                </label>
+
+                <label class="full-width">
+                    <span class="label-text">Copertina:</span>
+                    <input type="text" bind:value={book.cover} placeholder="Incolla il link dell'immagine di copertina" />
+                </label>
+
+                <div class="toggles-group full-width">
+                    <label class="toggle">
+                        <span class="label-text">Letto:</span>
+                        <input type="checkbox" bind:checked={book.read} />
+                        <span class="checkmark"></span>
+                    </label>
+
+                    <label class="toggle">
+                        <span class="label-text">Prestito:</span>
+                        <input type="checkbox" bind:checked={book.loaned} />
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+
+                <div class="buttons full-width">
+                    <button class="discard" on:click={discardChanges}>Annulla</button>
+                    <button class="save" on:click={saveChanges}>Salva</button>
+                </div>
+            </div>
+        {/if}
     </div>
+</div>
     
     <style>
         .hidden {

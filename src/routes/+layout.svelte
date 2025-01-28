@@ -93,7 +93,7 @@
     color: #333;
   }
 
-  :global(body::-webkit-scrollbar) {
+  :global(*::-webkit-scrollbar) {
     width: 0;
   }
 
