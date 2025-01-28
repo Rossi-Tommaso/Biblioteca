@@ -8,11 +8,10 @@
     getUserRole,
   } from "../../lib/db_scripts/db_functions";
   import { onMount } from "svelte";
-  import { Plus, Search, BookOpen } from "lucide-svelte";
+  import { Plus, Search, BookOpen, BookmarkIcon } from "lucide-svelte";
   import { biblioteca } from "../../stores/libStore";
   import { sidebarVisible } from "../../stores/utilsStore";
   import { toast } from "../../stores/utilsStore";
-
 
   onMount(async () => {
     sidebarVisible.set(false);
@@ -27,7 +26,9 @@
     });
   });
 
-  let booksToUpdade = false; 
+  let booksToUpdade = false;
+  let bookShelfs = new Set();
+  let selectedBookshelf = "all";
   let popup = true;
   let popupBook;
   let loading = true;
@@ -46,6 +47,8 @@
     loading = true;
     await fetchDb(`protectedData/${lib}`).then((data) => {
       books = data;
+      // Extract unique bookshelves
+      bookShelfs = new Set(data.map(book => book.bookshelf).filter(Boolean));
       displayedBooks = data;
       loading = false;
     });
@@ -75,22 +78,25 @@
 
   $: userRole = $user_role;
 
-  $: displayedBooks = searchQuery.trim()
-    ? books.filter((book) =>
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : books;
+  // Updated filter to include both search query and bookshelf
+  $: displayedBooks = books.filter(book => {
+    const matchesSearch = searchQuery.trim() === "" || 
+      book.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesBookshelf = selectedBookshelf === "all" || 
+      book.bookshelf === selectedBookshelf;
+    return matchesSearch && matchesBookshelf;
+  });
 
   $: {
-  if ($biblioteca) {
-    getBooks($biblioteca);
-  }
+    if ($biblioteca) {
+      getBooks($biblioteca);
+    }
 
-  if (booksToUpdade) {
-    getBooks($biblioteca);
-    booksToUpdade = false;
+    if (booksToUpdade) {
+      getBooks($biblioteca);
+      booksToUpdade = false;
+    }
   }
-}
 </script>
 
 {#if userRole}
@@ -106,21 +112,37 @@
       bind:book={popupBook}
       bind:length={books.length}
       bind:update={booksToUpdade}
+      bind:scaffali={bookShelfs}
     />
   {/if}
 
   <div class="top-actions">
     <h1 class="page-title">Biblioteca:</h1>
     <h1 class="lib-title">{$biblioteca.replace('_', ' ')}</h1>
-    <!-- <button>switch bookshelf</button> to implement -->
-    <div class="search-bar">
-      <Search size={20} />
-      <input
-        type="text"
-        placeholder="Cerca libri..."
-        bind:value={searchQuery}
-        aria-label="Search books"
-      />
+    
+    <div class="filters">
+      <div class="bookshelf-filter">
+        <BookmarkIcon size={20} />
+        <select 
+          bind:value={selectedBookshelf}
+          aria-label="Filter by bookshelf"
+        >
+          <option value="all">All Bookshelves</option>
+          {#each [...bookShelfs] as shelf}
+            <option value={shelf}>{shelf}</option>
+          {/each}
+        </select>
+      </div>
+
+      <div class="search-bar">
+        <Search size={20} />
+        <input
+          type="text"
+          placeholder="Cerca libri..."
+          bind:value={searchQuery}
+          aria-label="Search books"
+        />
+      </div>
     </div>
   </div>
 
@@ -141,6 +163,12 @@
               <div class="book-info">
                 <h2 class="book-title">{book.title}</h2>
                 <p class="book-author">by {book.author}</p>
+                {#if book.bookshelf}
+                  <p class="book-shelf">
+                    <BookmarkIcon size={16} />
+                    {book.bookshelf}
+                  </p>
+                {/if}
               </div>
               {#if userRole}
                 <div class="actions">
@@ -164,7 +192,7 @@
           <BookOpen size={48} />
           <p>No books found</p>
           <p class="empty-state-subtitle">
-            Try adjusting your search or add new books
+            Try adjusting your search or bookshelf filter
           </p>
         </div>
       {/if}
@@ -413,6 +441,58 @@
     .book-grid {
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 1rem;
+    }
+  }
+  
+  .filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .bookshelf-filter {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    min-width: 200px;
+  }
+
+  .bookshelf-filter select {
+    width: 100%;
+    border: none;
+    font-size: 1rem;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .bookshelf-filter select:focus {
+    outline: none;
+  }
+
+  .book-shelf {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .filters {
+      flex-direction: column;
+      max-width: none;
+    }
+
+    .bookshelf-filter {
+      width: 100%;
     }
   }
 </style>
