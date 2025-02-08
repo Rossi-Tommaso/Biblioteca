@@ -150,7 +150,7 @@
     {#if !loading}
       {#if displayedBooks.length > 0}
         <div class="book-grid">
-          {#each displayedBooks as book}
+          {#each displayedBooks.filter((_,id) => id !== 0) as book}
             <article class="book-card">
               <div class="cover-container">
                 <img
@@ -162,7 +162,7 @@
               </div>
               <div class="book-info">
                 <h2 class="book-title">{book.title}</h2>
-                <p class="book-author">by {book.author}</p>
+                <p class="book-author">by {book.authorName && book.authorSurname ? book.authorName.concat(' ' + book.authorSurname) : 'Autore sconosciuto'}</p>
                 {#if book.bookshelf}
                   <p class="book-shelf">
                     <BookmarkIcon size={16} />
