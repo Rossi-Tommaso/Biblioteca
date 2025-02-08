@@ -39,7 +39,7 @@
       console.log(lib);
       await fetchDb(`protectedData/${lib}`).then((data) => {
         console.log("DATAfrom db:", data);
-        recentBooks = data.slice(0, 3);
+        recentBooks = data.slice(0, 4);
         stats.totalBooks = data.length;
         stats.booksRead = data.filter((book) => book.read).length;
         stats.unread = data.filter((book) => !book.read).length;
@@ -54,8 +54,7 @@
 
   const getBooks = async (lib) => {
     await fetchDb(`protectedData/${lib}`).then((data) => {
-      console.log("DATAfrom db:", data);
-      recentBooks = data.slice(0, 3);
+      recentBooks = data.slice(0, 4);
       stats.totalBooks = data.length;
       stats.booksRead = data.filter((book) => book.read).length;
       stats.unread = data.filter((book) => !book.read).length;
@@ -115,7 +114,7 @@
       <h2>Ultimi Libri Aggiunti</h2>
       <div class="recent-books-grid">
         {#if !loading && recentBooks.length > 0}
-          {#each recentBooks as book}
+          {#each recentBooks.filter((_,id) => id !== 0).reverse() as book}
             <div class="recent-book-card">
               <div class="book-cover-container">
                 <img
@@ -126,7 +125,7 @@
               </div>
               <div class="book-details">
                 <h3>{book.title}</h3>
-                <p class="author">di {book.author}</p>
+                <p class="author">di {book.authorName && book.authorSurname ? book.authorName.concat(' ' + book.authorSurname) : 'Autore sconosciuto'}</p>
               </div>
             </div>
           {/each}
