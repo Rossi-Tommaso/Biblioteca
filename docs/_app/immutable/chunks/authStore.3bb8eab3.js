@@ -1,4 +1,4 @@
-import{w as Lt,j as Ba}from"./singletons.3fa68333.js";let Xp=Lt(!1);const Ts=Lt([]);function Zp(n,e="info"){const t=Math.random().toString(36);Ts.update(i=>[...i,{id:t,message:n,type:e}]),setTimeout(()=>{Ts.update(i=>i.filter(s=>s.id!==t))},3e3)}/**
+import{w as Lt,j as Ba}from"./singletons.202daa2f.js";let Xp=Lt(!1);const Ts=Lt([]);function Zp(n,e="info"){const t=Math.random().toString(36);Ts.update(i=>[...i,{id:t,message:n,type:e}]),setTimeout(()=>{Ts.update(i=>i.filter(s=>s.id!==t))},3e3)}/**
  * @license
  * Copyright 2017 Google LLC
  *
